@@ -1,4 +1,6 @@
 pluginManagement {
+    includeBuild("build-logic")
+
     repositories {
         google()
         mavenCentral()
@@ -8,6 +10,7 @@ pluginManagement {
 
 dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+
     repositories {
         google()
         mavenCentral()
@@ -15,6 +18,7 @@ dependencyResolutionManagement {
 }
 
 rootProject.name = "Combo Breaker"
-include ':combo-breaker'
-include ':combo-breaker-material3'
-include ':combo-breaker-demo'
+
+include(":combo-breaker")
+include(":combo-breaker-material3")
+include(":combo-breaker-demo")
