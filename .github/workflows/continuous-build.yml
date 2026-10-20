@@ -5,25 +5,27 @@ on:
     branches: [ development ]
     paths:
       - gradle/**
+      - build-logic/**
       - combo-breaker/**
       - combo-breaker-demo/**
       - combo-breaker-material3/**
-      - build.gradle
+      - build.gradle.kts
       - gradle.properties
       - gradlew
       - gradlew.bat
-      - settings.gradle
+      - settings.gradle.kts
   pull_request:
     paths:
       - gradle/**
+      - build-logic/**
       - combo-breaker/**
       - combo-breaker-demo/**
       - combo-breaker-material3/**
-      - build.gradle
+      - build.gradle.kts
       - gradle.properties
       - gradlew
       - gradlew.bat
-      - settings.gradle
+      - settings.gradle.kts
 
   workflow_dispatch:
 
