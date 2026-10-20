@@ -103,7 +103,7 @@ private fun TextPaint.setBrush(brush: Brush?, size: Size, alpha: Float = Float.N
  * [SpanStyle] that consists of attributes that were not applied to the [TextPaint].
  */
 @OptIn(ExperimentalTextApi::class)
-fun TextPaint.applySpanStyle(
+public fun TextPaint.applySpanStyle(
     style: SpanStyle,
     resolveTypeface: (FontFamily?, FontWeight, FontStyle, FontSynthesis) -> Typeface,
     density: Density,

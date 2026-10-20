@@ -9,6 +9,10 @@ android {
     namespace = "dev.romainguy.text.combobreaker.material3"
 }
 
+kotlin {
+    explicitApi()
+}
+
 dependencies {
     implementation(libs.compose.material3)
 

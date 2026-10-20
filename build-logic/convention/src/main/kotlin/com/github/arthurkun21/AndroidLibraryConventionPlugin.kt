@@ -9,6 +9,10 @@ class AndroidLibraryConventionPlugin : Plugin<Project> {
             pluginManager.apply(libs.pluginId("android-library"))
 
             configureAndroidLibrary()
+
+            // AGP registers the variant compile tasks during its own afterEvaluate callback,
+            // which was queued before this one, so the tasks exist by the time this runs.
+            afterEvaluate { configureAbiValidation() }
         }
     }
 }

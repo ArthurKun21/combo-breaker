@@ -1,0 +1,71 @@
+public final class dev/romainguy/text/combobreaker/BasicTextFlowKt {
+	public static final fun BasicTextFlow-8u0NR3k (Landroidx/compose/ui/text/AnnotatedString;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/Modifier;Ldev/romainguy/text/combobreaker/TextFlowJustification;Ldev/romainguy/text/combobreaker/TextFlowHyphenation;IFLkotlin/jvm/functions/Function1;Landroidx/compose/ui/Alignment;ZZLkotlin/jvm/functions/Function3;Landroidx/compose/runtime/Composer;III)V
+	public static final fun BasicTextFlow-8u0NR3k (Ljava/lang/String;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/Modifier;Ldev/romainguy/text/combobreaker/TextFlowJustification;Ldev/romainguy/text/combobreaker/TextFlowHyphenation;IFLkotlin/jvm/functions/Function1;Landroidx/compose/ui/Alignment;ZZLkotlin/jvm/functions/Function3;Landroidx/compose/runtime/Composer;III)V
+}
+
+public final class dev/romainguy/text/combobreaker/FlowType : java/lang/Enum {
+	public static final field None Ldev/romainguy/text/combobreaker/FlowType;
+	public static final field Outside Ldev/romainguy/text/combobreaker/FlowType;
+	public static final field OutsideEnd Ldev/romainguy/text/combobreaker/FlowType;
+	public static final field OutsideLeft Ldev/romainguy/text/combobreaker/FlowType;
+	public static final field OutsideRight Ldev/romainguy/text/combobreaker/FlowType;
+	public static final field OutsideStart Ldev/romainguy/text/combobreaker/FlowType;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Ldev/romainguy/text/combobreaker/FlowType;
+	public static fun values ()[Ldev/romainguy/text/combobreaker/FlowType;
+}
+
+public final class dev/romainguy/text/combobreaker/TextFlowHyphenation : java/lang/Enum {
+	public static final field Auto Ldev/romainguy/text/combobreaker/TextFlowHyphenation;
+	public static final field None Ldev/romainguy/text/combobreaker/TextFlowHyphenation;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Ldev/romainguy/text/combobreaker/TextFlowHyphenation;
+	public static fun values ()[Ldev/romainguy/text/combobreaker/TextFlowHyphenation;
+}
+
+public final class dev/romainguy/text/combobreaker/TextFlowJustification : java/lang/Enum {
+	public static final field Auto Ldev/romainguy/text/combobreaker/TextFlowJustification;
+	public static final field None Ldev/romainguy/text/combobreaker/TextFlowJustification;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Ldev/romainguy/text/combobreaker/TextFlowJustification;
+	public static fun values ()[Ldev/romainguy/text/combobreaker/TextFlowJustification;
+}
+
+public final class dev/romainguy/text/combobreaker/TextFlowLayoutResult {
+	public static final field $stable I
+	public fun <init> (FI)V
+	public final fun component1 ()F
+	public final fun component2 ()I
+	public final fun copy (FI)Ldev/romainguy/text/combobreaker/TextFlowLayoutResult;
+	public static synthetic fun copy$default (Ldev/romainguy/text/combobreaker/TextFlowLayoutResult;FIILjava/lang/Object;)Ldev/romainguy/text/combobreaker/TextFlowLayoutResult;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getHeight ()F
+	public final fun getLastOffset ()I
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public abstract interface class dev/romainguy/text/combobreaker/TextFlowScope {
+	public abstract fun align (Landroidx/compose/ui/Modifier;Landroidx/compose/ui/Alignment;)Landroidx/compose/ui/Modifier;
+	public abstract fun flowShape-d8LSEHM (Landroidx/compose/ui/Modifier;Ldev/romainguy/text/combobreaker/FlowType;FLandroidx/compose/ui/graphics/Path;)Landroidx/compose/ui/Modifier;
+	public abstract fun flowShape-d8LSEHM (Landroidx/compose/ui/Modifier;Ldev/romainguy/text/combobreaker/FlowType;FLkotlin/jvm/functions/Function2;)Landroidx/compose/ui/Modifier;
+	public static synthetic fun flowShape-d8LSEHM$default (Ldev/romainguy/text/combobreaker/TextFlowScope;Landroidx/compose/ui/Modifier;Ldev/romainguy/text/combobreaker/FlowType;FLandroidx/compose/ui/graphics/Path;ILjava/lang/Object;)Landroidx/compose/ui/Modifier;
+	public static synthetic fun flowShape-d8LSEHM$default (Ldev/romainguy/text/combobreaker/TextFlowScope;Landroidx/compose/ui/Modifier;Ldev/romainguy/text/combobreaker/FlowType;FLkotlin/jvm/functions/Function2;ILjava/lang/Object;)Landroidx/compose/ui/Modifier;
+	public abstract fun flowShapes-d8LSEHM (Landroidx/compose/ui/Modifier;Ldev/romainguy/text/combobreaker/FlowType;FLjava/util/List;)Landroidx/compose/ui/Modifier;
+	public abstract fun flowShapes-d8LSEHM (Landroidx/compose/ui/Modifier;Ldev/romainguy/text/combobreaker/FlowType;FLkotlin/jvm/functions/Function2;)Landroidx/compose/ui/Modifier;
+	public static synthetic fun flowShapes-d8LSEHM$default (Ldev/romainguy/text/combobreaker/TextFlowScope;Landroidx/compose/ui/Modifier;Ldev/romainguy/text/combobreaker/FlowType;FLjava/util/List;ILjava/lang/Object;)Landroidx/compose/ui/Modifier;
+	public static synthetic fun flowShapes-d8LSEHM$default (Ldev/romainguy/text/combobreaker/TextFlowScope;Landroidx/compose/ui/Modifier;Ldev/romainguy/text/combobreaker/FlowType;FLkotlin/jvm/functions/Function2;ILjava/lang/Object;)Landroidx/compose/ui/Modifier;
+	public abstract fun matchParentSize (Landroidx/compose/ui/Modifier;)Landroidx/compose/ui/Modifier;
+}
+
+public final class dev/romainguy/text/combobreaker/TextFlowScope$DefaultImpls {
+	public static synthetic fun flowShape-d8LSEHM$default (Ldev/romainguy/text/combobreaker/TextFlowScope;Landroidx/compose/ui/Modifier;Ldev/romainguy/text/combobreaker/FlowType;FLandroidx/compose/ui/graphics/Path;ILjava/lang/Object;)Landroidx/compose/ui/Modifier;
+	public static synthetic fun flowShape-d8LSEHM$default (Ldev/romainguy/text/combobreaker/TextFlowScope;Landroidx/compose/ui/Modifier;Ldev/romainguy/text/combobreaker/FlowType;FLkotlin/jvm/functions/Function2;ILjava/lang/Object;)Landroidx/compose/ui/Modifier;
+	public static synthetic fun flowShapes-d8LSEHM$default (Ldev/romainguy/text/combobreaker/TextFlowScope;Landroidx/compose/ui/Modifier;Ldev/romainguy/text/combobreaker/FlowType;FLjava/util/List;ILjava/lang/Object;)Landroidx/compose/ui/Modifier;
+	public static synthetic fun flowShapes-d8LSEHM$default (Ldev/romainguy/text/combobreaker/TextFlowScope;Landroidx/compose/ui/Modifier;Ldev/romainguy/text/combobreaker/FlowType;FLkotlin/jvm/functions/Function2;ILjava/lang/Object;)Landroidx/compose/ui/Modifier;
+}
+
+public final class dev/romainguy/text/combobreaker/TextPaintKt {
+	public static final fun applySpanStyle (Landroid/text/TextPaint;Landroidx/compose/ui/text/SpanStyle;Lkotlin/jvm/functions/Function4;Landroidx/compose/ui/unit/Density;)Landroidx/compose/ui/text/SpanStyle;
+}
+

@@ -80,7 +80,7 @@ import dev.romainguy.text.combobreaker.*
  * that is taken into account to layout [text].
  */
 @Composable
-fun TextFlow(
+public fun TextFlow(
     text: String,
     modifier: Modifier = Modifier,
     style: TextStyle = LocalTextStyle.current,
@@ -165,7 +165,7 @@ fun TextFlow(
  * that is taken into account to layout [text].
  */
 @Composable
-fun TextFlow(
+public fun TextFlow(
     text: AnnotatedString,
     modifier: Modifier = Modifier,
     style: TextStyle = LocalTextStyle.current,

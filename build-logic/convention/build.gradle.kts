@@ -9,6 +9,12 @@ dependencies {
 
     implementation(libs.dokka.gradle.plugin)
     implementation(libs.vanniktech.maven.publish.plugin)
+
+    // ABI validation: BCV task types, plus the runtime dependencies its worker needs
+    implementation(libs.binary.compatibility.validator)
+    implementation(libs.kotlin.metadata.jvm)
+    implementation(libs.asm)
+    implementation(libs.asm.tree)
 }
 
 gradlePlugin {

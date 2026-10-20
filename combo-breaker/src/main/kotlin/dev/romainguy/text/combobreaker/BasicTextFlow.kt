@@ -95,7 +95,7 @@ import kotlin.math.max
  * - [None]: the associate shape is entirely ignored for text flow. This is useful to
  *   keep an overlay above the text for instance.
  */
-enum class FlowType(private val bits: Int) {
+public enum class FlowType(private val bits: Int) {
     OutsideLeft(1),
     OutsideRight(2),
     Outside(3),
@@ -140,7 +140,7 @@ enum class FlowType(private val bits: Int) {
 /**
  * Controls the behavior of text justification in a [BasicTextFlow].
  */
-enum class TextFlowJustification {
+public enum class TextFlowJustification {
     /** Turns off text justification. */
     None,
     /** Turns on text justification. */
@@ -151,7 +151,7 @@ enum class TextFlowJustification {
  * Controls the behavior of text hyphenation in a [BasicTextFlow]. Hyphenation will only work on
  * API level 33 and above.
  */
-enum class TextFlowHyphenation {
+public enum class TextFlowHyphenation {
     /** No text hyphenation. */
     None,
     /** Automatic text hyphenation. */
@@ -165,7 +165,7 @@ enum class TextFlowHyphenation {
  * @param lastOffset Offset inside the source text marking the point where the layout stopped.
  * Any text after that offset was not laid out.
  */
-data class TextFlowLayoutResult(val height: Float, val lastOffset: Int)
+public data class TextFlowLayoutResult(public val height: Float, public val lastOffset: Int)
 
 /**
  * A layout composable with [content] that can flow [text] around the shapes defined by the
@@ -218,7 +218,7 @@ data class TextFlowLayoutResult(val height: Float, val lastOffset: Int)
  * shape that is taken into account to layout [text].
  */
 @Composable
-fun BasicTextFlow(
+public fun BasicTextFlow(
     text: String,
     style: TextStyle,
     modifier: Modifier = Modifier,
@@ -303,7 +303,7 @@ fun BasicTextFlow(
  * shape that is taken into account to layout [text].
  */
 @Composable
-fun BasicTextFlow(
+public fun BasicTextFlow(
     text: AnnotatedString,
     style: TextStyle,
     modifier: Modifier = Modifier,
@@ -649,7 +649,7 @@ private fun ContentDrawScope.drawDebugInfo(
  * - `size` The size of the element the flowShape modifier is applied to.
  * - `textFlowSize` The size of the parent [BasicTextFlow] container.
  */
-typealias FlowShapeProvider = (size: IntSize, textFlowSize: IntSize) -> Path?
+public typealias FlowShapeProvider = (size: IntSize, textFlowSize: IntSize) -> Path?
 
 /**
  * Lambda type used by [TextFlowScope.flowShape] to compute a list of flow shapes defined as [Path]
@@ -659,20 +659,20 @@ typealias FlowShapeProvider = (size: IntSize, textFlowSize: IntSize) -> Path?
  * - `size` The size of the element the flowShape modifier is applied to.
  * - `textFlowSize` The size of the parent [BasicTextFlow] container.
  */
-typealias FlowShapeListProvider = (size: IntSize, textFlowSize: IntSize) -> List<Path>
+public typealias FlowShapeListProvider = (size: IntSize, textFlowSize: IntSize) -> List<Path>
 
 /**
  * A [TextFlowScope] provides a scope for the children of [BasicTextFlow].
  */
 @LayoutScopeMarker
 @Immutable
-interface TextFlowScope {
+public interface TextFlowScope {
     /**
      * Pull the content element to a specific [Alignment] within the [BasicTextFlow]. This
      * alignment will have priority over the [BasicTextFlow]'s `alignment` parameter.
      */
     @Stable
-    fun Modifier.align(alignment: Alignment): Modifier
+    public fun Modifier.align(alignment: Alignment): Modifier
 
     /**
      * Size the element to match the size of the [BasicTextFlow] after all other content
@@ -684,7 +684,7 @@ interface TextFlowScope {
      * [BasicTextFlow]'s size.
      */
     @Stable
-    fun Modifier.matchParentSize(): Modifier
+    public fun Modifier.matchParentSize(): Modifier
 
     /**
      * Sets the shape used to flow text around this element.
@@ -695,7 +695,7 @@ interface TextFlowScope {
      * set to null, a rectangle of the dimensions of this element will be used by default.
      */
     @Stable
-    fun Modifier.flowShape(
+    public fun Modifier.flowShape(
         flowType: FlowType = Outside,
         margin: Dp = 0.dp,
         flowShape: Path? = null
@@ -710,7 +710,7 @@ interface TextFlowScope {
      * If the list is empty, a rectangle of the dimensions of this element will be used by default.
      */
     @Stable
-    fun Modifier.flowShapes(
+    public fun Modifier.flowShapes(
         flowType: FlowType = Outside,
         margin: Dp = 0.dp,
         flowShapes: List<Path> = emptyList()
@@ -729,7 +729,7 @@ interface TextFlowScope {
      * this element will be used instead.
      */
     @Stable
-    fun Modifier.flowShape(
+    public fun Modifier.flowShape(
         flowType: FlowType = Outside,
         margin: Dp = 0.dp,
         flowShape: FlowShapeProvider
@@ -748,7 +748,7 @@ interface TextFlowScope {
      * element will be used instead.
      */
     @Stable
-    fun Modifier.flowShapes(
+    public fun Modifier.flowShapes(
         flowType: FlowType = Outside,
         margin: Dp = 0.dp,
         flowShapes: FlowShapeListProvider
