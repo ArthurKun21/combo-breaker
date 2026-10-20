@@ -1,6 +1,6 @@
 buildscript {
     ext {
-        compose_bom = '2025.05.00'
+        compose_bom = '2025.12.01'
         core_ktx_version = '1.16.0'
     }
 
