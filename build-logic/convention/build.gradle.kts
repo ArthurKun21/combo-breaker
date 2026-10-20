@@ -6,7 +6,6 @@ group = "dev.romainguy.combobreaker.buildlogic"
 
 dependencies {
     compileOnly(libs.android.gradle.plugin)
-    compileOnly(libs.kotlin.gradle.plugin)
 
     implementation(libs.dokka.gradle.plugin)
     implementation(libs.vanniktech.maven.publish.plugin)

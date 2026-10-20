@@ -10,7 +10,7 @@ android {
 }
 
 dependencies {
-    implementation(libs.androidx.compose.material3)
+    implementation(libs.compose.material3)
 
     api(project(":combo-breaker"))
 }
