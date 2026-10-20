@@ -4,8 +4,9 @@ import org.gradle.api.Plugin
 import org.gradle.api.Project
 
 /**
- * Applies Dokka. Documentation settings are controlled through `gradle.properties`
- * (POM_* properties and `org.jetbrains.dokka.experimental.gradle.pluginMode`).
+ * Applies Dokka. Dokka's plugin mode is selected through the
+ * `org.jetbrains.dokka.experimental.gradle.pluginMode` property in `gradle.properties`; the
+ * published POM metadata is configured separately in `MavenPublish.kt`.
  */
 class DokkaConventionPlugin : Plugin<Project> {
     override fun apply(target: Project) {

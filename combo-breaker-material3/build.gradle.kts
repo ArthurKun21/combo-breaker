@@ -14,7 +14,10 @@ kotlin {
 }
 
 dependencies {
-    implementation(libs.compose.material3)
+    // Compose types (Modifier, AnnotatedString, TextStyle) appear in this module's public
+    // signatures, so they must be exposed to consumers on their compile classpath.
+    api(libs.compose.ui)
+    api(libs.compose.material3)
 
     api(project(":combo-breaker"))
 }

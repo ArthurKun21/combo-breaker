@@ -14,6 +14,9 @@ kotlin {
 }
 
 dependencies {
-    implementation(libs.compose.ui)
+    // Compose types (Modifier, TextStyle, Alignment, Path, ...) appear in this module's public
+    // signatures, so they must be exposed to consumers on their compile classpath.
+    api(libs.compose.ui)
+
     implementation(libs.compose.material3)
 }

@@ -46,11 +46,20 @@ internal fun Project.configureAbiValidation() {
         generatedApiFile.set(buildApi.flatMap { it.outputApiFile })
     }
 
-    tasks.register<AbiDumpTask>("updateKotlinAbi") {
+    // BCV's comparison failure message tells the user to run an `apiDump` task, so the dump is
+    // registered under that name to keep the hint actionable. `updateKotlinAbi` is kept as the
+    // project's own name for the same task.
+    val dumpApi = tasks.register<AbiDumpTask>("apiDump") {
         group = LifecycleBasePlugin.VERIFICATION_GROUP
         description = "Updates the reference ABI dump in $referenceDump."
         generatedApiFile.set(buildApi.flatMap { it.outputApiFile })
         committedApiFile.set(referenceDump)
+    }
+
+    tasks.register("updateKotlinAbi") {
+        group = LifecycleBasePlugin.VERIFICATION_GROUP
+        description = "Updates the reference ABI dump in $referenceDump."
+        dependsOn(dumpApi)
     }
 
     tasks.named(LifecycleBasePlugin.CHECK_TASK_NAME) {
