@@ -1,4 +1,4 @@
-package dev.romainguy.combobreaker.buildlogic
+package com.github.arthurkun21
 
 import com.android.build.api.dsl.ApplicationExtension
 import com.android.build.api.dsl.LibraryExtension

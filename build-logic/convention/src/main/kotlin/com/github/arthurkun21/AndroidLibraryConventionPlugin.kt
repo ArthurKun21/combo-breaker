@@ -1,4 +1,4 @@
-package dev.romainguy.combobreaker.buildlogic
+package com.github.arthurkun21
 
 import org.gradle.api.Plugin
 import org.gradle.api.Project

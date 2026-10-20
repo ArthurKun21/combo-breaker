@@ -2,7 +2,7 @@ plugins {
     `kotlin-dsl`
 }
 
-group = "dev.romainguy.combobreaker.buildlogic"
+group = "com.github.arthurkun21"
 
 dependencies {
     compileOnly(libs.android.gradle.plugin)
@@ -15,23 +15,23 @@ gradlePlugin {
     plugins {
         register("androidLibrary") {
             id = "combo-breaker.android.library"
-            implementationClass = "dev.romainguy.combobreaker.buildlogic.AndroidLibraryConventionPlugin"
+            implementationClass = "com.github.arthurkun21.AndroidLibraryConventionPlugin"
         }
         register("androidApplication") {
             id = "combo-breaker.android.application"
-            implementationClass = "dev.romainguy.combobreaker.buildlogic.AndroidApplicationConventionPlugin"
+            implementationClass = "com.github.arthurkun21.AndroidApplicationConventionPlugin"
         }
         register("androidCompose") {
             id = "combo-breaker.android.compose"
-            implementationClass = "dev.romainguy.combobreaker.buildlogic.AndroidComposeConventionPlugin"
+            implementationClass = "com.github.arthurkun21.AndroidComposeConventionPlugin"
         }
         register("dokka") {
             id = "combo-breaker.dokka"
-            implementationClass = "dev.romainguy.combobreaker.buildlogic.DokkaConventionPlugin"
+            implementationClass = "com.github.arthurkun21.DokkaConventionPlugin"
         }
         register("mavenPublish") {
             id = "combo-breaker.maven.publish"
-            implementationClass = "dev.romainguy.combobreaker.buildlogic.MavenPublishConventionPlugin"
+            implementationClass = "com.github.arthurkun21.MavenPublishConventionPlugin"
         }
     }
 }
