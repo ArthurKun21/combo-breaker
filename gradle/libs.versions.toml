@@ -7,16 +7,16 @@ compose = "1.12.2"
 # CMP material3 is versioned separately; 1.9.0 is the latest stable release.
 compose-material3 = "1.9.0"
 
-core-ktx = "1.16.0"
-lifecycle = "2.9.0"
+core-ktx = "1.19.1"
+lifecycle = "2.11.0"
 activity-compose = "1.13.0"
 pathway = "0.19.1"
 
 dokka = "2.2.0"
 vanniktech-maven-publish = "0.37.0"
 
-bcv = "0.18.1"
-asm = "9.7"
+bcv = "0.18.2"
+asm = "9.11.1"
 
 [libraries]
 androidx-core-ktx = { module = "androidx.core:core-ktx", version.ref = "core-ktx" }
