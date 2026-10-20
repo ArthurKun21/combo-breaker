@@ -60,7 +60,7 @@ dependencies {
     implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.9.0'
     implementation 'androidx.activity:activity-compose:1.13.0'
 
-    implementation 'dev.romainguy:pathway:0.18.0'
+    implementation 'dev.romainguy:pathway:0.19.1'
 
     implementation project(path: ':combo-breaker-material3')
 }
