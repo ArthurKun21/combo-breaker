@@ -2,9 +2,28 @@ name: Android
 
 on:
   push:
-    branches: [ main ]
+    branches: [ development ]
+    paths:
+      - gradle/**
+      - combo-breaker/**
+      - combo-breaker-demo/**
+      - combo-breaker-material3/**
+      - build.gradle
+      - gradle.properties
+      - gradlew
+      - gradlew.bat
+      - settings.gradle
   pull_request:
-    branches: [ main ]
+    paths:
+      - gradle/**
+      - combo-breaker/**
+      - combo-breaker-demo/**
+      - combo-breaker-material3/**
+      - build.gradle
+      - gradle.properties
+      - gradlew
+      - gradlew.bat
+      - settings.gradle
 
   workflow_dispatch:
 
