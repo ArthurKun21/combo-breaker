@@ -55,4 +55,5 @@ jobs:
         uses: gradle/actions/setup-gradle@v6.3.0
 
       - name: Build library
-        run: ./gradlew assembleRelease
+        run: |
+          ./gradlew :combo-breaker:assembleRelease:combo-breaker-material3:assembleRelease
