@@ -21,6 +21,7 @@ import android.graphics.BitmapFactory
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -61,17 +62,19 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.round
 import androidx.compose.ui.unit.sp
+import dev.romainguy.graphics.path.toPath
+import dev.romainguy.graphics.path.toPaths
 import dev.romainguy.text.combobreaker.FlowType
 import dev.romainguy.text.combobreaker.TextFlowHyphenation
 import dev.romainguy.text.combobreaker.TextFlowJustification
 import dev.romainguy.text.combobreaker.demo.ui.theme.ComboBreakerTheme
 import dev.romainguy.text.combobreaker.material3.TextFlow
-import dev.romainguy.graphics.path.toPath
-import dev.romainguy.graphics.path.toPaths
 
 class ComboBreakerActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        enableEdgeToEdge()
 
         setContent {
             MaterialDemoSetup {
@@ -92,61 +95,63 @@ class ComboBreakerActivity : ComponentActivity() {
         var isDebugOverlayEnabled by remember { mutableStateOf(true) }
 
         //region Sample text
-        val sampleText by remember { derivedStateOf {
-            buildAnnotatedString {
-                withStyle(SpanStyle(fontWeight = FontWeight.Bold, fontSize = 24.sp)) {
-                    if (useMultipleShapes || !useRectangleShapes) {
-                        append("T")
+        val sampleText by remember {
+            derivedStateOf {
+                buildAnnotatedString {
+                    withStyle(SpanStyle(fontWeight = FontWeight.Bold, fontSize = 24.sp)) {
+                        if (useMultipleShapes || !useRectangleShapes) {
+                            append("T")
+                        }
+                        append("he Hyphen")
                     }
-                    append("he Hyphen")
-                }
-                append("\n\n")
-                append("The ")
-                withStyle(style = SpanStyle(color = colorScheme.primary)) {
-                    append("English language ")
-                }
-                append("does not have definitive hyphenation rules, though various ")
-                withStyle(style = SpanStyle(color = colorScheme.primary)) {
-                    append("style guides ")
-                }
-                append("provide detailed usage recommendations and have a significant ")
-                append("amount of overlap in what they advise. Hyphens are mostly used to break single ")
-                append("words into parts or to join ordinarily separate words into single words. Spaces ")
-                append("are not placed between a hyphen and either of the elements it connects except ")
-                append("when using a suspended or ")
-                withStyle(style = SpanStyle(fontStyle = FontStyle.Italic)) {
-                    append("\"hanging\" ")
-                }
-                append("hyphen that stands in for a repeated word (e.g., nineteenth- and ")
-                append("twentieth-century writers). Style conventions that apply to hyphens (and ")
-                append("dashes) have evolved to support ease of reading in complex constructions; ")
-                append("editors often accept deviations if they aid rather than hinder easy ")
-                append("comprehension.\n\n")
+                    append("\n\n")
+                    append("The ")
+                    withStyle(style = SpanStyle(color = colorScheme.primary)) {
+                        append("English language ")
+                    }
+                    append("does not have definitive hyphenation rules, though various ")
+                    withStyle(style = SpanStyle(color = colorScheme.primary)) {
+                        append("style guides ")
+                    }
+                    append("provide detailed usage recommendations and have a significant ")
+                    append("amount of overlap in what they advise. Hyphens are mostly used to break single ")
+                    append("words into parts or to join ordinarily separate words into single words. Spaces ")
+                    append("are not placed between a hyphen and either of the elements it connects except ")
+                    append("when using a suspended or ")
+                    withStyle(style = SpanStyle(fontStyle = FontStyle.Italic)) {
+                        append("\"hanging\" ")
+                    }
+                    append("hyphen that stands in for a repeated word (e.g., nineteenth- and ")
+                    append("twentieth-century writers). Style conventions that apply to hyphens (and ")
+                    append("dashes) have evolved to support ease of reading in complex constructions; ")
+                    append("editors often accept deviations if they aid rather than hinder easy ")
+                    append("comprehension.\n\n")
 
-                append("The use of the hyphen in ")
-                withStyle(style = SpanStyle(color = colorScheme.primary)) {
-                    append("English compound ")
-                }
-                append("nouns and verbs has, in general, ")
-                append("been steadily declining. Compounds that might once have been hyphenated are ")
-                append("increasingly left with spaces or are combined into one word. Reflecting this ")
-                append("changing usage, in 2007, the sixth edition of the ")
-                withStyle(style = SpanStyle(fontStyle = FontStyle.Italic)) {
-                    append("Shorter Oxford English ")
-                }
-                append("Dictionary removed the hyphens from 16,000 entries, such as fig-leaf (now fig ")
-                append("leaf), pot-belly (now pot belly), and pigeon-hole (now pigeonhole). The ")
-                append("increasing prevalence of computer technology and the advent of the Internet ")
-                append("have given rise to a subset of common nouns that might have been hyphenated ")
-                append("in the past (e.g., toolbar, hyperlink, and pastebin).\n\n")
+                    append("The use of the hyphen in ")
+                    withStyle(style = SpanStyle(color = colorScheme.primary)) {
+                        append("English compound ")
+                    }
+                    append("nouns and verbs has, in general, ")
+                    append("been steadily declining. Compounds that might once have been hyphenated are ")
+                    append("increasingly left with spaces or are combined into one word. Reflecting this ")
+                    append("changing usage, in 2007, the sixth edition of the ")
+                    withStyle(style = SpanStyle(fontStyle = FontStyle.Italic)) {
+                        append("Shorter Oxford English ")
+                    }
+                    append("Dictionary removed the hyphens from 16,000 entries, such as fig-leaf (now fig ")
+                    append("leaf), pot-belly (now pot belly), and pigeon-hole (now pigeonhole). The ")
+                    append("increasing prevalence of computer technology and the advent of the Internet ")
+                    append("have given rise to a subset of common nouns that might have been hyphenated ")
+                    append("in the past (e.g., toolbar, hyperlink, and pastebin).\n\n")
 
-                append("Despite decreased use, hyphenation remains the norm in certain ")
-                append("compound-modifier constructions and, among some authors, with certain ")
-                append("prefixes (see below). Hyphenation is also routinely used as part of ")
-                append("syllabification in justified texts to avoid unsightly spacing (especially ")
-                append("in columns with narrow line lengths, as when used with newspapers).")
+                    append("Despite decreased use, hyphenation remains the norm in certain ")
+                    append("compound-modifier constructions and, among some authors, with certain ")
+                    append("prefixes (see below). Hyphenation is also routinely used as part of ")
+                    append("syllabification in justified texts to avoid unsightly spacing (especially ")
+                    append("in columns with narrow line lengths, as when used with newspapers).")
+                }
             }
-        } }
+        }
         //endregion
 
         val microphone = remember {
@@ -200,16 +205,16 @@ class ComboBreakerActivity : ComponentActivity() {
             TextFlow(
                 sampleText,
                 modifier = Modifier.weight(1.0f).fillMaxWidth(),
-                style =  LocalTextStyle.current.merge(
+                style = LocalTextStyle.current.merge(
                     TextStyle(
                         color = colorScheme.onSurface,
-                        fontSize = if (useMultipleShapes) 13.sp else LocalTextStyle.current.fontSize
-                    )
+                        fontSize = if (useMultipleShapes) 13.sp else LocalTextStyle.current.fontSize,
+                    ),
                 ),
                 justification = justification,
                 hyphenation = hyphenation,
                 columns = columns,
-                debugOverlay = isDebugOverlayEnabled
+                debugOverlay = isDebugOverlayEnabled,
             ) {
                 if (!useMultipleShapes) {
                     Image(
@@ -217,16 +222,17 @@ class ComboBreakerActivity : ComponentActivity() {
                         contentDescription = "",
                         modifier = Modifier
                             .offset {
-                                if (useRectangleShapes)
+                                if (useRectangleShapes) {
                                     IntOffset(0, 0)
-                                else
+                                } else {
                                     Offset(-microphone.width / 4.5f, 0.0f).round()
+                                }
                             }
                             .flowShape(
                                 FlowType.OutsideEnd,
                                 if (useRectangleShapes) 0.dp else 8.dp,
-                                if (useRectangleShapes) null else microphoneShape
-                            )
+                                if (useRectangleShapes) null else microphoneShape,
+                            ),
                     )
 
                     Image(
@@ -237,8 +243,8 @@ class ComboBreakerActivity : ComponentActivity() {
                             .flowShape(
                                 FlowType.Outside,
                                 if (useRectangleShapes) 8.dp else 10.dp,
-                                if (useRectangleShapes) null else badgeShape
-                            )
+                                if (useRectangleShapes) null else badgeShape,
+                            ),
                     )
                 } else {
                     Image(
@@ -246,7 +252,7 @@ class ComboBreakerActivity : ComponentActivity() {
                         contentDescription = "",
                         modifier = Modifier
                             .align(Alignment.Center)
-                            .flowShapes(FlowType.Outside, 2.dp, heartsShape)
+                            .flowShapes(FlowType.Outside, 2.dp, heartsShape),
                     )
                 }
             }
@@ -255,9 +261,9 @@ class ComboBreakerActivity : ComponentActivity() {
                 columns, { columns = it },
                 useRectangleShapes, { useRectangleShapes = it },
                 useMultipleShapes, { useMultipleShapes = it },
-                isJustified, { isJustified = it},
-                isHyphenated, { isHyphenated = it},
-                isDebugOverlayEnabled, { isDebugOverlayEnabled = it},
+                isJustified, { isJustified = it },
+                isHyphenated, { isHyphenated = it },
+                isDebugOverlayEnabled, { isDebugOverlayEnabled = it },
             )
         }
     }
@@ -284,7 +290,7 @@ class ComboBreakerActivity : ComponentActivity() {
                 modifier = Modifier.weight(0.1f),
                 value = columns.toFloat(),
                 onValueChange = { onColumnsChanged(it.toInt()) },
-                valueRange = 1.0f..4.0f
+                valueRange = 1.0f..4.0f,
             )
             Spacer(modifier = Modifier.width(8.dp))
 
@@ -315,10 +321,10 @@ class ComboBreakerActivity : ComponentActivity() {
                 topBar = {
                     TopAppBar(
                         title = { Text("Combo Breaker Demo") },
-                        colors = TopAppBarDefaults.mediumTopAppBarColors(
+                        colors = TopAppBarDefaults.topAppBarColors(
                             containerColor = MaterialTheme.colorScheme.primary,
-                            titleContentColor = MaterialTheme.colorScheme.onPrimary
-                        )
+                            titleContentColor = MaterialTheme.colorScheme.onPrimary,
+                        ),
                     )
                 },
             ) { padding ->
@@ -327,7 +333,7 @@ class ComboBreakerActivity : ComponentActivity() {
                         .fillMaxSize()
                         .padding(paddingValues = padding),
                     color = MaterialTheme.colorScheme.surface,
-                    content = content
+                    content = content,
                 )
             }
         }
