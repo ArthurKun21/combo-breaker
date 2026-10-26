@@ -27,7 +27,12 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import dev.romainguy.text.combobreaker.*
+import dev.romainguy.text.combobreaker.BasicTextFlow
+import dev.romainguy.text.combobreaker.FlowType
+import dev.romainguy.text.combobreaker.TextFlowHyphenation
+import dev.romainguy.text.combobreaker.TextFlowJustification
+import dev.romainguy.text.combobreaker.TextFlowLayoutResult
+import dev.romainguy.text.combobreaker.TextFlowScope
 
 /**
  * A layout composable with [content] that can flow [text] around the shapes defined by the
@@ -92,7 +97,7 @@ public fun TextFlow(
     contentAlignment: Alignment = Alignment.TopStart,
     propagateMinConstraints: Boolean = false,
     debugOverlay: Boolean = false,
-    content: @Composable TextFlowScope.() -> Unit
+    content: @Composable TextFlowScope.() -> Unit,
 ) {
     val annotatedText by remember(text, style) {
         derivedStateOf { AnnotatedString(text, style.toSpanStyle()) }
@@ -110,7 +115,7 @@ public fun TextFlow(
         contentAlignment,
         propagateMinConstraints,
         debugOverlay,
-        content
+        content,
     )
 }
 
@@ -177,7 +182,7 @@ public fun TextFlow(
     contentAlignment: Alignment = Alignment.TopStart,
     propagateMinConstraints: Boolean = false,
     debugOverlay: Boolean = false,
-    content: @Composable TextFlowScope.() -> Unit
+    content: @Composable TextFlowScope.() -> Unit,
 ) {
     BasicTextFlow(
         text,
@@ -191,6 +196,6 @@ public fun TextFlow(
         contentAlignment,
         propagateMinConstraints,
         debugOverlay,
-        content
+        content,
     )
 }
