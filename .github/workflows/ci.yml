@@ -1,4 +1,4 @@
-name: Android
+name: CI
 
 on:
   push:
@@ -34,6 +34,11 @@ env:
   JAVA_VERSION: 21
   JAVA_DISTRO: 'temurin'
   GRADLE_OPTS: '-Dorg.gradle.jvmargs="-Xmx4g -XX:MaxMetaspaceSize=1g -XX:+UseParallelGC"'
+
+
+concurrency:
+  group: ${{ github.ref }}-ci
+  cancel-in-progress: ${{ github.ref != 'refs/heads/development' }}
 
 jobs:
   build:
