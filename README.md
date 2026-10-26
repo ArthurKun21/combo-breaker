@@ -1,17 +1,18 @@
 # Combo Breaker
 
-[![combo-breaker](https://maven-badges.herokuapp.com/maven-central/dev.romainguy/combo-breaker/badge.svg?subject=combo-breaker)](https://maven-badges.herokuapp.com/maven-central/dev.romainguy/combo-breaker)
-[![combo-breaker-material3](https://maven-badges.herokuapp.com/maven-central/dev.romainguy/combo-breaker-material3/badge.svg?subject=combo-breaker-material3)](https://maven-badges.herokuapp.com/maven-central/dev.romainguy/combo-breaker-material3)
-[![Android build status](https://github.com/romainguy/combo-breaker/workflows/Android/badge.svg)](https://github.com/romainguy/combo-breaker/actions?query=workflow%3AAndroid)
+[![CI](https://github.com/ArthurKun21/combo-breaker/actions/workflows/ci.yml/badge.svg)](https://github.com/ArthurKun21/combo-breaker/actions/workflows/ci.yml)
+[![Lint](https://github.com/ArthurKun21/combo-breaker/actions/workflows/lint.yaml/badge.svg)](https://github.com/ArthurKun21/combo-breaker/actions/workflows/lint.yaml)
 
-Composable widget for Jetpack Compose that allows to flow text around arbitrary shapes over
-multiple columns. The `TextFlow` composable behaves as a `Box` layout and will automatically
-flow the text content around its children.
+A fork of [romainguy/combo-breaker](https://github.com/romainguy/combo-breaker): composable widget
+for Jetpack Compose that allows to flow text around arbitrary shapes over multiple columns. The
+`TextFlow` composable behaves as a `Box` layout and will automatically flow the text content
+around its children.
 
 * [Features](#features)
 * [Design Systems](#design-systems)
 * [Examples](#examples)
 * [Maven](#maven)
+* [Building](#building)
 * [Roadmap](#roadmap)
 * [License](#license)
 * [Attribution](#attribution)
@@ -30,8 +31,8 @@ flow the text content around its children.
 
 Combo Breaker provides two levels of APIs depending on what design system you use:
 
-- `BasicTextFlow` from the `dev.romainguy:combo-breaker` artifact, which works with any design system
-- `TextFlow` from the `dev.romainguy:combo-breaker-material3` artifact, which works with Material3
+- `BasicTextFlow` from the `io.github.arthurkun21:combo-breaker` artifact, which works with any design system
+- `TextFlow` from the `io.github.arthurkun21:combo-breaker-material3` artifact, which works with Material3
 
 Choose `BasicTextFlow` if you do not have or do not want a dependency on
 `androidx.compose.material3:material3`.
@@ -152,11 +153,20 @@ repositories {
 
 dependencies {
     // Use this library and BasicTextFlow() if you don't want a dependency on material3
-    implementation 'dev.romainguy:combo-breaker:0.9.0'
+    implementation 'io.github.arthurkun21:combo-breaker:0.9.0'
 
     // Use this library and TextFlow() if you use material3
-    implementation 'dev.romainguy:combo-breaker-material3:0.9.0'
+    implementation 'io.github.arthurkun21:combo-breaker-material3:0.9.0'
 }
+```
+
+## Building
+
+The project builds with the Gradle wrapper (no local installation required):
+
+```shell
+./gradlew build          # assemble all modules
+./gradlew spotlessCheck  # verify formatting/lint (spotlessCheck runs in CI)
 ```
 
 ## Roadmap
