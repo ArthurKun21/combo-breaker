@@ -48,16 +48,16 @@ import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.layout.LayoutCoordinates
 import androidx.compose.ui.layout.Measurable
 import androidx.compose.ui.layout.MeasurePolicy
-import androidx.compose.ui.layout.OnPlacedModifier
-import androidx.compose.ui.layout.ParentDataModifier
 import androidx.compose.ui.layout.Placeable
 import androidx.compose.ui.layout.positionInParent
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.node.LayoutAwareModifierNode
+import androidx.compose.ui.node.ModifierNodeElement
+import androidx.compose.ui.node.ParentDataModifierNode
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalFontFamilyResolver
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.text.font.createFontFamilyResolver
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
@@ -101,19 +101,24 @@ public enum class FlowType(private val bits: Int) {
     Outside(3),
     OutsideStart(-1),
     OutsideEnd(-2),
-    None(0);
+    None(0),
+    ;
 
     /**
      * Returns true if this type permits a left flow (including with [Outside]).
      */
     internal val isLeftFlow: Boolean
-        get() { return (bits and 0x1) != 0 }
+        get() {
+            return (bits and 0x1) != 0
+        }
 
     /**
      * Returns true if this type permits a right flow (including with [Outside]).
      */
     internal val isRightFlow: Boolean
-        get() { return (bits and 0x2) != 0 }
+        get() {
+            return (bits and 0x2) != 0
+        }
 
     /**
      * Returns a new [FlowType] set to either [OutsideLeft], [OutsideRight], [Outside],
@@ -126,6 +131,7 @@ public enum class FlowType(private val bits: Int) {
             OutsideEnd -> OutsideRight
             else -> this
         }
+
         LayoutDirection.Rtl -> when (this) {
             OutsideLeft -> OutsideLeft
             OutsideRight -> OutsideRight
@@ -143,8 +149,9 @@ public enum class FlowType(private val bits: Int) {
 public enum class TextFlowJustification {
     /** Turns off text justification. */
     None,
+
     /** Turns on text justification. */
-    Auto
+    Auto,
 }
 
 /**
@@ -154,8 +161,9 @@ public enum class TextFlowJustification {
 public enum class TextFlowHyphenation {
     /** No text hyphenation. */
     None,
+
     /** Automatic text hyphenation. */
-    Auto
+    Auto,
 }
 
 /**
@@ -230,7 +238,7 @@ public fun BasicTextFlow(
     contentAlignment: Alignment = Alignment.TopStart,
     propagateMinConstraints: Boolean = false,
     debugOverlay: Boolean = false,
-    content: @Composable TextFlowScope.() -> Unit
+    content: @Composable TextFlowScope.() -> Unit,
 ) {
     val annotatedText by remember(text, style) {
         derivedStateOf { AnnotatedString(text, style.toSpanStyle()) }
@@ -248,7 +256,7 @@ public fun BasicTextFlow(
         contentAlignment,
         propagateMinConstraints,
         debugOverlay,
-        content
+        content,
     )
 }
 
@@ -315,12 +323,12 @@ public fun BasicTextFlow(
     contentAlignment: Alignment = Alignment.TopStart,
     propagateMinConstraints: Boolean = false,
     debugOverlay: Boolean = false,
-    content: @Composable TextFlowScope.() -> Unit
+    content: @Composable TextFlowScope.() -> Unit,
 ) {
-    val context = LocalContext.current
     val density = LocalDensity.current
+    val fontFamilyResolver = LocalFontFamilyResolver.current
 
-    val state = remember { TextFlowState(createFontFamilyResolver(context), density) }
+    val state = remember(fontFamilyResolver, density) { TextFlowState(fontFamilyResolver, density) }
 
     var debugLinePosition by remember { mutableStateOf(Float.NaN) }
 
@@ -356,7 +364,7 @@ public fun BasicTextFlow(
                 minWidth = if (selfWidth != Constraints.Infinity) selfWidth else 0,
                 minHeight = if (selfHeight != Constraints.Infinity) selfHeight else 0,
                 maxWidth = selfWidth,
-                maxHeight = selfHeight
+                maxHeight = selfHeight,
             )
             measurables.fastForEachIndexed { index, measurable ->
                 if (measurable.matchesParentSize) {
@@ -384,7 +392,7 @@ public fun BasicTextFlow(
                     size,
                     layoutDirection,
                     contentAlignment,
-                    selfSize
+                    selfSize,
                 )
 
                 buildFlowShapes(
@@ -395,7 +403,7 @@ public fun BasicTextFlow(
                     clip,
                     state.shapes,
                     state.density,
-                    layoutDirection
+                    layoutDirection,
                 )
             }
 
@@ -410,7 +418,7 @@ public fun BasicTextFlow(
                 layoutDirection,
                 justification,
                 hyphenation,
-                state
+                state,
             )
 
             onTextFlowLayoutResult(result)
@@ -472,7 +480,7 @@ public fun BasicTextFlow(
                             column,
                             container,
                             state.shapes,
-                            results = results
+                            results = results,
                         )
                         slots.addAll(columnSlots)
                         column.offset(columnWidth + spacing, 0.0f)
@@ -486,19 +494,19 @@ public fun BasicTextFlow(
                         }
                     }
                 }
-                .pointerInput(Unit) {
-                    detectDragGestures { change, _ ->
-                        debugLinePosition = change.position.y
+                    .pointerInput(Unit) {
+                        detectDragGestures { change, _ ->
+                            debugLinePosition = change.position.y
+                        }
                     }
-                }
-            }
+            },
     )
 }
 
 @Stable
 internal class TextFlowState(
     val resolver: FontFamily.Resolver,
-    val density: Density
+    val density: Density,
 ) {
     val textSegments: ArrayList<TextSegment> = ArrayList()
     val shapes: ArrayList<FlowShape> = ArrayList()
@@ -512,7 +520,7 @@ private fun buildFlowShapes(
     clip: Path,
     flowShapes: ArrayList<FlowShape>,
     density: Density,
-    layoutDirection: LayoutDirection
+    layoutDirection: LayoutDirection,
 ) {
     val textFlowData = measurable.textFlowData ?: DefaultTextFlowParentData
 
@@ -530,7 +538,7 @@ private fun buildFlowShapes(
     }
 
     val flowType = textFlowData.flowType.resolve(layoutDirection)
-    val margin = with (density) { textFlowData.margin.toPx() }
+    val margin = with(density) { textFlowData.margin.toPx() }
 
     val sourcePaths = textFlowData.flowShapes(size, boxSize)
     if (sourcePaths.isEmpty()) {
@@ -575,13 +583,13 @@ private fun Placeable.PlacementScope.placeElement(
     size: IntSize,
     layoutDirection: LayoutDirection,
     alignment: Alignment,
-    boxSize: IntSize
+    boxSize: IntSize,
 ): IntOffset {
     val childAlignment = measurable.textFlowData?.alignment ?: alignment
     val position = childAlignment.align(
         size,
         boxSize,
-        layoutDirection
+        layoutDirection,
     )
     placeable.place(position)
     return position
@@ -593,7 +601,7 @@ private fun ContentDrawScope.drawDebugInfo(
     flowShapes: ArrayList<FlowShape>,
     intervals: MutableList<Interval<PathSegment>>,
     slots: List<RectF>,
-    stripeFill: Brush
+    stripeFill: Brush,
 ) {
     for (flowShape in flowShapes) {
         drawPath(flowShape.path, stripeFill)
@@ -606,7 +614,7 @@ private fun ContentDrawScope.drawDebugInfo(
                 color = DebugColors.SegmentColor,
                 start = Offset(segment.x0, segment.y0),
                 end = Offset(segment.x1, segment.y1),
-                strokeWidth = 3.0f
+                strokeWidth = 3.0f,
             )
         }
     }
@@ -614,7 +622,7 @@ private fun ContentDrawScope.drawDebugInfo(
     drawRect(
         color = DebugColors.LineFill,
         topLeft = Offset(0.0f, y1),
-        size = Size(size.width, y2 - y1)
+        size = Size(size.width, y2 - y1),
     )
 
     for (slot in slots) {
@@ -622,7 +630,7 @@ private fun ContentDrawScope.drawDebugInfo(
             drawRect(
                 color = DebugColors.SecondaryLineFill,
                 topLeft = slot.toOffset(),
-                size = slot.toSize()
+                size = slot.toSize(),
             )
         }
     }
@@ -631,14 +639,14 @@ private fun ContentDrawScope.drawDebugInfo(
         color = DebugColors.LineBorder,
         start = Offset(0.0f, y1),
         end = Offset(size.width, y1),
-        strokeWidth = 3.0f
+        strokeWidth = 3.0f,
     )
 
     drawLine(
         color = DebugColors.LineBorder,
         start = Offset(0.0f, y2),
         end = Offset(size.width, y2),
-        strokeWidth = 3.0f
+        strokeWidth = 3.0f,
     )
 }
 
@@ -698,7 +706,7 @@ public interface TextFlowScope {
     public fun Modifier.flowShape(
         flowType: FlowType = Outside,
         margin: Dp = 0.dp,
-        flowShape: Path? = null
+        flowShape: Path? = null,
     ): Modifier
 
     /**
@@ -713,7 +721,7 @@ public interface TextFlowScope {
     public fun Modifier.flowShapes(
         flowType: FlowType = Outside,
         margin: Dp = 0.dp,
-        flowShapes: List<Path> = emptyList()
+        flowShapes: List<Path> = emptyList(),
     ): Modifier
 
     /**
@@ -732,7 +740,7 @@ public interface TextFlowScope {
     public fun Modifier.flowShape(
         flowType: FlowType = Outside,
         margin: Dp = 0.dp,
-        flowShape: FlowShapeProvider
+        flowShape: FlowShapeProvider,
     ): Modifier
 
     /**
@@ -751,72 +759,72 @@ public interface TextFlowScope {
     public fun Modifier.flowShapes(
         flowType: FlowType = Outside,
         margin: Dp = 0.dp,
-        flowShapes: FlowShapeListProvider
+        flowShapes: FlowShapeListProvider,
     ): Modifier
 }
 
 private object TextFlowScopeInstance : TextFlowScope {
     @Stable
     override fun Modifier.align(alignment: Alignment) = this.then(
-        AlignmentAndSizeModifier(
+        AlignmentAndSizeElement(
             alignment = alignment,
-            matchParentSize = false
-        )
+            matchParentSize = false,
+        ),
     )
 
     @Stable
     override fun Modifier.matchParentSize() = this.then(
-        AlignmentAndSizeModifier(
+        AlignmentAndSizeElement(
             alignment = Alignment.Center,
-            matchParentSize = true
-        )
+            matchParentSize = true,
+        ),
     )
 
     @Stable
     override fun Modifier.flowShape(flowType: FlowType, margin: Dp, flowShape: Path?) = this.then(
-        FlowShapeModifier(flowType, margin) { _, _ ->
+        FlowShapeElement(flowType, margin) { _, _ ->
             if (flowShape == null) emptyList() else listOf(flowShape)
-        }
+        },
     )
 
     @Stable
     override fun Modifier.flowShape(
         flowType: FlowType,
         margin: Dp,
-        flowShape: FlowShapeProvider
+        flowShape: FlowShapeProvider,
     ) = this.then(
-        FlowShapeModifier(flowType, margin) { size, containerSize ->
+        FlowShapeElement(flowType, margin) { size, containerSize ->
             val path = flowShape(size, containerSize)
             if (path == null) emptyList() else listOf(path)
-        }
+        },
     )
 
     @Stable
     override fun Modifier.flowShapes(
         flowType: FlowType,
         margin: Dp,
-        flowShapes: List<Path>
+        flowShapes: List<Path>,
     ) = this.then(
-        FlowShapeModifier(flowType, margin) { _, _ -> flowShapes }
+        FlowShapeElement(flowType, margin) { _, _ -> flowShapes },
     )
 
     @Stable
     override fun Modifier.flowShapes(
         flowType: FlowType,
         margin: Dp,
-        flowShapes: FlowShapeListProvider
+        flowShapes: FlowShapeListProvider,
     ) = this.then(
-        FlowShapeModifier(flowType, margin, flowShapes)
+        FlowShapeElement(flowType, margin, flowShapes),
     )
 }
 
 private val Measurable.textFlowData: TextFlowParentData? get() = parentData as? TextFlowParentData
 private val Measurable.matchesParentSize: Boolean get() = textFlowData?.matchParentSize ?: false
 
-private class AlignmentAndSizeModifier(
-    val alignment: Alignment,
-    val matchParentSize: Boolean = false
-) : ParentDataModifier, OnPlacedModifier {
+private class AlignmentAndSizeNode(
+    var alignment: Alignment,
+    var matchParentSize: Boolean = false,
+) : Modifier.Node(), ParentDataModifierNode, LayoutAwareModifierNode {
     var localParentData: TextFlowParentData? = null
 
     override fun Density.modifyParentData(parentData: Any?): TextFlowParentData {
@@ -831,29 +839,27 @@ private class AlignmentAndSizeModifier(
         localParentData?.position = coordinates.positionInParent()
     }
 
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        val otherModifier = other as? AlignmentAndSizeModifier ?: return false
-
-        return alignment == otherModifier.alignment &&
-                matchParentSize == otherModifier.matchParentSize
-    }
-
-    override fun hashCode(): Int {
-        var result = alignment.hashCode()
-        result = 31 * result + matchParentSize.hashCode()
-        return result
-    }
-
     override fun toString(): String =
-        "AlignmentAndSizeModifier(alignment=$alignment, matchParentSize=$matchParentSize)"
+        "AlignmentAndSizeNode(alignment=$alignment, matchParentSize=$matchParentSize)"
 }
 
-private class FlowShapeModifier(
-    val flowType: FlowType,
-    val margin: Dp,
-    val flowShape: FlowShapeListProvider
-) : ParentDataModifier, OnPlacedModifier {
+private data class AlignmentAndSizeElement(
+    val alignment: Alignment,
+    val matchParentSize: Boolean = false,
+) : ModifierNodeElement<AlignmentAndSizeNode>() {
+    override fun create() = AlignmentAndSizeNode(alignment, matchParentSize)
+
+    override fun update(node: AlignmentAndSizeNode) {
+        node.alignment = alignment
+        node.matchParentSize = matchParentSize
+    }
+}
+
+private class FlowShapeNode(
+    var flowType: FlowType,
+    var margin: Dp,
+    var flowShape: FlowShapeListProvider,
+) : Modifier.Node(), ParentDataModifierNode, LayoutAwareModifierNode {
     var localParentData: TextFlowParentData? = null
 
     override fun Density.modifyParentData(parentData: Any?): TextFlowParentData {
@@ -869,28 +875,21 @@ private class FlowShapeModifier(
         localParentData?.position = coordinates.positionInParent()
     }
 
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (javaClass != other?.javaClass) return false
+    override fun toString(): String =
+        "FlowShapeNode(margin=$margin, flowType=$flowType)"
+}
 
-        other as FlowShapeModifier
+private data class FlowShapeElement(
+    val flowType: FlowType,
+    val margin: Dp,
+    val flowShape: FlowShapeListProvider,
+) : ModifierNodeElement<FlowShapeNode>() {
+    override fun create() = FlowShapeNode(flowType, margin, flowShape)
 
-        if (margin != other.margin) return false
-        if (flowType != other.flowType) return false
-        if (flowShape != other.flowShape) return false
-
-        return true
-    }
-
-    override fun hashCode(): Int {
-        var result = margin.hashCode()
-        result = 31 * result + flowType.hashCode()
-        result = 31 * result + flowShape.hashCode()
-        return result
-    }
-
-    override fun toString(): String {
-        return "FlowShapeModifier(margin=$margin, flowType=$flowType)"
+    override fun update(node: FlowShapeNode) {
+        node.flowType = flowType
+        node.margin = margin
+        node.flowShape = flowShape
     }
 }
 
@@ -900,7 +899,7 @@ private data class TextFlowParentData(
     var margin: Dp = 0.dp,
     var flowType: FlowType = Outside,
     var flowShapes: FlowShapeListProvider = { _, _ -> emptyList() },
-    var position: Offset = Offset.Unspecified
+    var position: Offset = Offset.Unspecified,
 )
 
 private val DefaultTextFlowParentData = TextFlowParentData()
@@ -923,5 +922,5 @@ private fun Density.debugStripeFill() = Brush.linearGradient(
     0.75f to DebugColors.StripeBackground, 1.00f to DebugColors.StripeBackground,
     start = Offset.Zero,
     end = Offset(8.dp.toPx(), 8.dp.toPx()),
-    tileMode = TileMode.Repeated
+    tileMode = TileMode.Repeated,
 )

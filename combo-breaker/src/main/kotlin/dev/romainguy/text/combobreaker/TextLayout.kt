@@ -61,7 +61,7 @@ internal class TextSegment(
     val justifyWidth: Float,
     val x: Float,
     val y: Float,
-    val paint: TextPaint
+    val paint: TextPaint,
 )
 
 /**
@@ -93,9 +93,8 @@ internal fun layoutTextFlow(
     layoutDirection: LayoutDirection,
     justification: TextFlowJustification,
     hyphenation: TextFlowHyphenation,
-    flowState: TextFlowState
+    flowState: TextFlowState,
 ): TextFlowLayoutResult {
-
     val lineBreaker = LineBreaker.Builder()
         .setBreakStrategy(LineBreaker.BREAK_STRATEGY_HIGH_QUALITY)
         .setHyphenationFrequency(LineBreaker.HYPHENATION_FREQUENCY_FULL)
@@ -115,14 +114,14 @@ internal fun layoutTextFlow(
         if (ltr) 0.0f else size.width - columnWidth,
         0.0f,
         if (ltr) columnWidth else size.width.toFloat(),
-        size.height.toFloat()
+        size.height.toFloat(),
     )
 
     val state = TextLayoutState(
         text,
         style,
         flowState.resolver,
-        flowState.density
+        flowState.density,
     )
 
     val slotFinderState = FlowSlotFinderState()
@@ -157,7 +156,7 @@ internal fun layoutTextFlow(
                     RectF(column.left, y, column.right, y + lineHeight),
                     RectF(0.0f, y, size.width.toFloat(), y + lineHeight),
                     flowState.shapes,
-                    slotFinderState
+                    slotFinderState,
                 )
 
                 var ascent = 0.0f
@@ -190,7 +189,7 @@ internal fun layoutTextFlow(
                         state.result = lineBreaker.computeLineBreaks(
                             state.measuredText,
                             constraints,
-                            0
+                            0,
                         )
 
                         state.lastParagraphLine = 0
@@ -227,7 +226,7 @@ internal fun layoutTextFlow(
                         startOffset,
                         endOffset,
                         endHyphen,
-                        justification
+                        justification,
                     )
 
                     // We couldn't fit our text in the available slot, try the next one
@@ -268,8 +267,8 @@ internal fun layoutTextFlow(
                                 justifyWidth,
                                 x,
                                 y + lineAscent,
-                                paint
-                            )
+                                paint,
+                            ),
                         )
 
                         cursor = end
@@ -286,7 +285,7 @@ internal fun layoutTextFlow(
                             } else {
                                 x += state.measuredText.getWidth(
                                     start - state.paragraphOffset,
-                                    end - state.paragraphOffset
+                                    end - state.paragraphOffset,
                                 )
                             }
                         }
@@ -340,9 +339,8 @@ internal fun layoutTextFlow(
  * [TextLayoutState] when invoking [TextLayoutState.currentParagraphStyles].
  */
 private fun MeasuredText.Builder.appendStyleRuns(
-    state: TextLayoutState
+    state: TextLayoutState,
 ): MeasuredText.Builder {
-
     state.currentParagraphStyles().forEach { interval ->
         if (interval.end > state.paragraphOffset) {
             val start = max(0, (interval.start - state.paragraphOffset).toInt())
@@ -368,7 +366,7 @@ private fun justify(
     paragraphLastLineOffset: Int,
     paragraphLineOffset: Int,
     endHyphen: Int,
-    justification: TextFlowJustification
+    justification: TextFlowJustification,
 ): Float {
     var justifyWidth = 0.0f
 
@@ -382,15 +380,16 @@ private fun justify(
         // can work with to justify or fit our text in the slot
         val hasEndHyphen = endHyphen != 0
 
-        val endOffset = if (hasEndHyphen)
+        val endOffset = if (hasEndHyphen) {
             paragraphLineOffset
-        else
+        } else {
             trimEndSpace(paragraph, state.paragraphOffset, paragraphLineOffset)
+        }
 
         val stretchableSpaces = countStretchableSpaces(
             paragraph,
             paragraphLastLineOffset,
-            endOffset
+            endOffset,
         )
 
         // If we found stretchable spaces, we can attempt justification/line
@@ -427,33 +426,38 @@ private fun justify(
 // tree. The tree doesn't preserve ordering and this comparator puts the intervals/ranges
 // back in the order provided by AnnotatedString
 private val StyleComparator = Comparator { s1: Interval<SpanStyle>, s2: Interval<SpanStyle> ->
-        val start = (s1.start - s2.start).toInt()
-        if (start < 0.0f) -1
-        else if (start == 0) (s2.end - s1.end).toInt()
-        else 1
+    val start = (s1.start - s2.start).toInt()
+    if (start < 0.0f) {
+        -1
+    } else if (start == 0) {
+        (s2.end - s1.end).toInt()
+    } else {
+        1
     }
+}
 
 private class TextLayoutState(
     val text: AnnotatedString,
     val textStyle: TextStyle,
     private val resolver: FontFamily.Resolver,
-    private val density: Density
+    private val density: Density,
 ) {
     // List of all the paragraphs in our original text
     private val paragraphs = text.split('\n')
 
     // Summed list of offsets: each entry corresponds to the starting offset of the corresponding
     // paragraph in the original text
-    private var _paragraphStartOffsets = paragraphs.scan(0) { accumulator, element ->
+    private var paragraphStartOffsets = paragraphs.scan(0) { accumulator, element ->
         accumulator + element.length + 1
     }
 
     // Start offset in the original text of the current paragraph
     private inline val currentParagraphStartOffset: Int
-        get() = _paragraphStartOffsets[_currentParagraph]
+        get() = paragraphStartOffsets[_currentParagraph]
 
     // Index of the current paragraph in our list of paragraphs
     private var _currentParagraph = 0
+
     // Current paragraph as a String
     inline val currentParagraph: String
         get() = paragraphs[_currentParagraph]
@@ -501,6 +505,7 @@ private class TextLayoutState(
     // annotated string. To make lookups easier, we merge the styles ahead of time when
     // consuming a new paragraph
     val mergedStyles = ArrayList<Interval<TextStyle>>(16)
+
     // Temporary list used to query paragraph styles
     val stylesQuery = ArrayList<Interval<SpanStyle>>(16)
 
@@ -542,7 +547,7 @@ private class TextLayoutState(
 
         val searchInternal = Interval<SpanStyle>(
             offset.toFloat(),
-            (offset + paragraph.length).toFloat()
+            (offset + paragraph.length).toFloat(),
         )
 
         stylesQuery.clear()
@@ -590,14 +595,14 @@ private class TextLayoutState(
                     mergedStyles[i] = Interval(merged.start, end, mergedData.merge(styleData))
                     mergedStyles.add(
                         i + 1,
-                        Interval(start, merged.start, mergedData)
+                        Interval(start, merged.start, mergedData),
                     )
                 } else if (start < merged.end && end > merged.end) {
                     // The current style left-intersects with the merged style
                     mergedStyles[i] = Interval(merged.start, start, mergedData)
                     mergedStyles.add(
                         i + 1,
-                        Interval(start, merged.end, mergedData.merge(styleData))
+                        Interval(start, merged.end, mergedData.merge(styleData)),
                     )
                 }
             }
@@ -618,8 +623,8 @@ private class TextLayoutState(
  */
 private fun isLineEndSpace(c: Char) =
     c == ' ' || c == '\t' || c == Char(0x1680) ||
-    (Char(0x2000) <= c && c <= Char(0x200A) && c != Char(0x2007)) ||
-    c == Char(0x205F) || c == Char(0x3000)
+        (Char(0x2000) <= c && c <= Char(0x200A) && c != Char(0x2007)) ||
+        c == Char(0x205F) || c == Char(0x3000)
 
 /**
  * Count the number of stretchable spaces between [start] and [end] in the specified string.
@@ -649,7 +654,7 @@ private fun trimEndSpace(text: String, startOffset: Int, lineEndOffset: Int): In
 }
 
 private fun MeasuredText.Builder.hyphenation(
-    hyphenation: TextFlowHyphenation
+    hyphenation: TextFlowHyphenation,
 ): MeasuredText.Builder {
     if (Build.VERSION.SDK_INT >= 33) {
         MeasuredTextHelper.hyphenation(this, hyphenation)

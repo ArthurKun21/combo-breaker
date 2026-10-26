@@ -33,7 +33,7 @@ internal class PathSegment(val x0: Float, val y0: Float, val x1: Float, val y1: 
  * a given interval such as a line of a text.
  */
 internal fun Path.toIntervals(
-    intervals: IntervalTree<PathSegment> = IntervalTree()
+    intervals: IntervalTree<PathSegment> = IntervalTree(),
 ): IntervalTree<PathSegment> {
     intervals.clear()
 

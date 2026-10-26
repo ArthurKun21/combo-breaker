@@ -60,7 +60,7 @@ internal fun findFlowSlots(
     container: RectF,
     flowShapes: ArrayList<FlowShape>,
     state: FlowSlotFinderState = FlowSlotFinderState(),
-    results: MutableList<Interval<PathSegment>>? = null
+    results: MutableList<Interval<PathSegment>>? = null,
 ): List<RectF> {
     var foundIntervals = false
     val searchInterval = Interval<PathSegment>(box.top, box.bottom)
@@ -146,7 +146,7 @@ internal fun findFlowSlots(
  */
 private fun applyFlowShapeExclusions(
     flowShapes: MutableList<FlowShape>,
-    slots: MutableList<RectF>
+    slots: MutableList<RectF>,
 ) {
     // Fix-up slots by applying exclusion zones from flow shapes
     val flowShapeHitCount = flowShapes.size
@@ -221,7 +221,7 @@ private fun addReducedSlots(
     box: RectF,
     min: Float,
     max: Float,
-    slots: MutableList<RectF>
+    slots: MutableList<RectF>,
 ) {
     val left = box.left
     val top = box.top
@@ -277,8 +277,8 @@ private fun addReducedSlots(
 @Suppress("NOTHING_TO_INLINE")
 private inline fun quickReject(flowShape: FlowShape, top: Float, bottom: Float) =
     flowShape.flowType == FlowType.None ||
-    top > flowShape.bounds.bottom ||
-    bottom < flowShape.bounds.top
+        top > flowShape.bounds.bottom ||
+        bottom < flowShape.bounds.top
 
 /**
  * Behaves like RectF.intersect(float, float, float, float) but only deals with the

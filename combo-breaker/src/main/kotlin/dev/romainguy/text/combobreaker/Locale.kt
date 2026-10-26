@@ -25,7 +25,7 @@ internal fun Locale.toJavaLocale(): java.util.Locale = java.util.Locale(language
 internal object LocaleListHelper {
     fun setTextLocales(textPaint: TextPaint, localeList: LocaleList) {
         textPaint.textLocales = android.os.LocaleList(
-            *localeList.map { it.toJavaLocale() }.toTypedArray()
+            *localeList.map { it.toJavaLocale() }.toTypedArray(),
         )
     }
 }

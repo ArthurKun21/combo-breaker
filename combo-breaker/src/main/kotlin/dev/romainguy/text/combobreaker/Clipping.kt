@@ -21,11 +21,11 @@ import android.graphics.RectF
 import kotlin.math.abs
 
 // Clipping flags indicating where clipping must occur
-private const val ClipNone = 0
-private const val ClipTop = 1
-private const val ClipBottom = 2
-private const val ClipLeft = 4
-private const val ClipRight = 8
+private const val CLIP_NONE = 0
+private const val CLIP_TOP = 1
+private const val CLIP_BOTTOM = 2
+private const val CLIP_LEFT = 4
+private const val CLIP_RIGHT = 8
 
 /**
  * Clips the segment described by [p1] and [p2] against the rectangle [r]. This function
@@ -41,14 +41,14 @@ internal fun clipSegment(p1: PointF, p2: PointF, r: RectF, scratch: PointF): Boo
 
     while (true) {
         // Return when we are fully inside or fully outside the rectangle
-        if ((clip1 or clip2) == ClipNone) return true
-        if ((clip1 and clip2) != ClipNone) return false
+        if ((clip1 or clip2) == CLIP_NONE) return true
+        if ((clip1 and clip2) != CLIP_NONE) return false
 
         // No need to test for the case where both end points are outside of the rectangle
         // since we only test against parts of the path that overlap the text interval
 
         // Choose one of the two end points to treat first
-        val clipType = if (clip1 != ClipNone) clip1 else clip2
+        val clipType = if (clip1 != CLIP_NONE) clip1 else clip2
         intersection(p1, p2, r, clipType, scratch)
 
         // Depending on which end point we clipped, update the segment and recompute the
@@ -67,11 +67,11 @@ internal fun clipSegment(p1: PointF, p2: PointF, r: RectF, scratch: PointF): Boo
  * Computes the clip flags required for [p] to lie on or inside the rectangle [r]
  */
 private fun clipType(p: PointF, r: RectF): Int {
-    var clip = ClipNone
-    if (p.y < r.top) clip = clip or ClipTop
-    if (p.y > r.bottom) clip = clip or ClipBottom
-    if (p.x < r.left) clip = clip or ClipLeft
-    if (p.x > r.right) clip = clip or ClipRight
+    var clip = CLIP_NONE
+    if (p.y < r.top) clip = clip or CLIP_TOP
+    if (p.y > r.bottom) clip = clip or CLIP_BOTTOM
+    if (p.x < r.left) clip = clip or CLIP_LEFT
+    if (p.x > r.right) clip = clip or CLIP_RIGHT
     return clip
 }
 
@@ -89,22 +89,22 @@ private fun intersection(p1: PointF, p2: PointF, r: RectF, clip: Int, out: Point
     val sx = if (abs(dx) < 1e-3f) 0.0f else dy / dx
     val sy = if (abs(dy) < 1e-3f) 0.0f else dx / dy
 
-    if ((clip and ClipTop) != 0) {
+    if ((clip and CLIP_TOP) != 0) {
         out.set(p1.x + sy * (r.top - p1.y), r.top)
         return
     }
 
-    if ((clip and ClipBottom) != 0) {
+    if ((clip and CLIP_BOTTOM) != 0) {
         out.set(p1.x + sy * (r.bottom - p1.y), r.bottom)
         return
     }
 
-    if ((clip and ClipLeft) != 0) {
+    if ((clip and CLIP_LEFT) != 0) {
         out.set(r.left, p1.y + sx * (r.left - p1.x))
         return
     }
 
-    if ((clip and ClipRight) != 0) {
+    if ((clip and CLIP_RIGHT) != 0) {
         out.set(r.right, p1.y + sx * (r.right - p1.x))
         return
     }

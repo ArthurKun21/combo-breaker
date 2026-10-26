@@ -30,7 +30,6 @@ import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.isSpecified
 import androidx.compose.ui.graphics.toArgb
-import androidx.compose.ui.text.ExperimentalTextApi
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
@@ -61,7 +60,7 @@ private fun TextPaint.setShadow(shadow: Shadow?) {
             correctBlurRadius(shadow.blurRadius),
             shadow.offset.x,
             shadow.offset.y,
-            shadow.color.toArgb()
+            shadow.color.toArgb(),
         )
     }
 }
@@ -77,14 +76,15 @@ private fun TextPaint.setBrush(brush: Brush?, size: Size, alpha: Float = Float.N
     // if size is unspecified and brush is not null, nothing should be done.
     // it basically means brush is given but size is not yet calculated at this time.
     if ((brush is SolidColor && brush.value.isSpecified) ||
-        (brush is ShaderBrush && size.isSpecified)) {
+        (brush is ShaderBrush && size.isSpecified)
+    ) {
         // alpha is always applied even if Float.NaN is passed to applyTo function.
         // if it's actually Float.NaN, we simply send the current value
         val p = androidx.compose.ui.graphics.Paint()
         brush.applyTo(
             size,
             p,
-            if (alpha.isNaN()) this.alpha / 255.0f else alpha.coerceIn(0f, 1f)
+            if (alpha.isNaN()) this.alpha / 255.0f else alpha.coerceIn(0f, 1f),
         )
         val fwkPaint = p.asFrameworkPaint()
         this.alpha = fwkPaint.alpha
@@ -102,7 +102,6 @@ private fun TextPaint.setBrush(brush: Brush?, size: Size, alpha: Float = Float.N
  * as regular platform spans such as background, baselineShift. This function also returns a new
  * [SpanStyle] that consists of attributes that were not applied to the [TextPaint].
  */
-@OptIn(ExperimentalTextApi::class)
 public fun TextPaint.applySpanStyle(
     style: SpanStyle,
     resolveTypeface: (FontFamily?, FontWeight, FontStyle, FontSynthesis) -> Typeface,
@@ -112,9 +111,11 @@ public fun TextPaint.applySpanStyle(
         TextUnitType.Sp -> with(density) {
             textSize = style.fontSize.toPx()
         }
+
         TextUnitType.Em -> {
             textSize *= style.fontSize.value
         }
+
         else -> {} // Do nothing
     }
 
@@ -123,7 +124,7 @@ public fun TextPaint.applySpanStyle(
             style.fontFamily,
             style.fontWeight ?: FontWeight.Normal,
             style.fontStyle ?: FontStyle.Normal,
-            style.fontSynthesis ?: FontSynthesis.All
+            style.fontSynthesis ?: FontSynthesis.All,
         )
     }
 
@@ -141,8 +142,13 @@ public fun TextPaint.applySpanStyle(
     }
 
     when (style.letterSpacing.type) {
-        TextUnitType.Em -> { letterSpacing = style.letterSpacing.value }
-        TextUnitType.Sp -> {} // Sp will be handled by applying a span
+        TextUnitType.Em -> {
+            letterSpacing = style.letterSpacing.value
+        }
+
+        TextUnitType.Sp -> {}
+
+        // Sp will be handled by applying a span
         else -> {} // Do nothing
     }
 
@@ -187,7 +193,7 @@ public fun TextPaint.applySpanStyle(
             null
         } else {
             style.baselineShift
-        }
+        },
     )
 }
 
@@ -219,7 +225,7 @@ private class TypefaceDirtyTracker(resolveResult: State<Any>) {
 internal fun createTextPaint(
     fontFamilyResolver: FontFamily.Resolver,
     style: TextStyle,
-    density: Density
+    density: Density,
 ) = TextPaint().apply {
     val resolvedTypefaces: MutableList<TypefaceDirtyTracker> = mutableListOf()
     val resolveTypeface: (FontFamily?, FontWeight, FontStyle, FontSynthesis) -> Typeface =
@@ -228,7 +234,7 @@ internal fun createTextPaint(
                 fontFamily,
                 fontWeight,
                 fontStyle,
-                fontSynthesis
+                fontSynthesis,
             )
             val holder = TypefaceDirtyTracker(result)
             resolvedTypefaces.add(holder)

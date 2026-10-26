@@ -46,7 +46,7 @@ internal class IntervalTree<T> {
 
     private val terminator = Node(
         Interval(Float.MAX_VALUE, Float.MIN_VALUE, null),
-        TreeColor.Black
+        TreeColor.Black,
     )
     private var root = terminator
 
@@ -64,7 +64,7 @@ internal class IntervalTree<T> {
      */
     fun findOverlaps(
         interval: Interval<T>,
-        results: MutableList<Interval<T>> = mutableListOf()
+        results: MutableList<Interval<T>> = mutableListOf(),
     ): MutableList<Interval<T>> {
         if (root !== terminator) {
             findOverlaps(root, interval, results)
@@ -75,7 +75,7 @@ internal class IntervalTree<T> {
     private fun findOverlaps(
         node: Node,
         interval: Interval<T>,
-        results: MutableList<Interval<T>>
+        results: MutableList<Interval<T>>,
     ) {
         if (node.interval.overlaps(interval)) results.add(node.interval)
         if (node.left !== terminator && node.left.max >= interval.start) {
@@ -227,7 +227,8 @@ internal class IntervalTree<T> {
     }
 
     private enum class TreeColor {
-        Red, Black
+        Red,
+        Black,
     }
 
     private inner class Node(val interval: Interval<T>, var color: TreeColor = TreeColor.Red) {
