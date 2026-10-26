@@ -2,42 +2,41 @@ plugins {
     `kotlin-dsl`
 }
 
-group = "com.github.arthurkun21"
+group = "combobreaker.buildlogic"
 
 dependencies {
-    compileOnly(libs.android.gradle.plugin)
-
+    implementation(libs.android.gradle.plugin)
+    implementation(libs.compose.compiler.gradle)
+    implementation(libs.spotless.gradle)
     implementation(libs.dokka.gradle.plugin)
     implementation(libs.vanniktech.maven.publish.plugin)
-
-    // ABI validation: BCV task types, plus the runtime dependencies its worker needs
-    implementation(libs.binary.compatibility.validator)
-    implementation(libs.kotlin.metadata.jvm)
-    implementation(libs.asm)
-    implementation(libs.asm.tree)
 }
 
 gradlePlugin {
     plugins {
+        register("codeLint") {
+            id = "combo-breaker.code.lint"
+            implementationClass = "CodeLintConventionPlugin"
+        }
+        register("compose") {
+            id = "combo-breaker.compose"
+            implementationClass = "ComposeConventionPlugin"
+        }
         register("androidLibrary") {
             id = "combo-breaker.android.library"
-            implementationClass = "com.github.arthurkun21.AndroidLibraryConventionPlugin"
+            implementationClass = "AndroidLibraryConventionPlugin"
         }
         register("androidApplication") {
             id = "combo-breaker.android.application"
-            implementationClass = "com.github.arthurkun21.AndroidApplicationConventionPlugin"
-        }
-        register("androidCompose") {
-            id = "combo-breaker.android.compose"
-            implementationClass = "com.github.arthurkun21.AndroidComposeConventionPlugin"
+            implementationClass = "AndroidApplicationConventionPlugin"
         }
         register("dokka") {
             id = "combo-breaker.dokka"
-            implementationClass = "com.github.arthurkun21.DokkaConventionPlugin"
+            implementationClass = "DokkaConventionPlugin"
         }
         register("mavenPublish") {
             id = "combo-breaker.maven.publish"
-            implementationClass = "com.github.arthurkun21.MavenPublishConventionPlugin"
+            implementationClass = "MavenPublishConventionPlugin"
         }
     }
 }

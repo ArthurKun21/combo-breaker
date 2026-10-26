@@ -1,6 +1,6 @@
 plugins {
     id("combo-breaker.android.application")
-    id("combo-breaker.android.compose")
+    id("combo-breaker.compose")
 }
 
 android {
@@ -11,10 +11,6 @@ android {
 
         versionCode = 1
         versionName = "1.0"
-
-        vectorDrawables {
-            useSupportLibrary = true
-        }
     }
 
     buildTypes {
