@@ -56,7 +56,5 @@ jobs:
         uses: gradle/actions/setup-gradle@v6.3.0
 
       - name: Check ABI compatibility
-        run: >-
-          ./gradlew
-          :combo-breaker:checkKotlinAbi
-          :combo-breaker-material3:checkKotlinAbi
+        run: |
+          ./gradlew :combo-breaker:checkKotlinAbi combo-breaker-material3:checkKotlinAbi
