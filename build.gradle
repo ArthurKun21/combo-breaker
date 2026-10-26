@@ -6,7 +6,7 @@ buildscript {
 
     dependencies {
         classpath 'com.vanniktech:gradle-maven-publish-plugin:0.31.0'
-        classpath 'org.jetbrains.dokka:dokka-gradle-plugin:2.0.0'
+        classpath 'org.jetbrains.dokka:dokka-gradle-plugin:2.2.0'
     }
 }
 
