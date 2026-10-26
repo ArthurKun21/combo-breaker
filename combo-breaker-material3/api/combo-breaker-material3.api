@@ -1,5 +1,0 @@
-public final class dev/romainguy/text/combobreaker/material3/TextFlowKt {
-	public static final fun TextFlow-8u0NR3k (Landroidx/compose/ui/text/AnnotatedString;Landroidx/compose/ui/Modifier;Landroidx/compose/ui/text/TextStyle;Ldev/romainguy/text/combobreaker/TextFlowJustification;Ldev/romainguy/text/combobreaker/TextFlowHyphenation;IFLkotlin/jvm/functions/Function1;Landroidx/compose/ui/Alignment;ZZLkotlin/jvm/functions/Function3;Landroidx/compose/runtime/Composer;III)V
-	public static final fun TextFlow-8u0NR3k (Ljava/lang/String;Landroidx/compose/ui/Modifier;Landroidx/compose/ui/text/TextStyle;Ldev/romainguy/text/combobreaker/TextFlowJustification;Ldev/romainguy/text/combobreaker/TextFlowHyphenation;IFLkotlin/jvm/functions/Function1;Landroidx/compose/ui/Alignment;ZZLkotlin/jvm/functions/Function3;Landroidx/compose/runtime/Composer;III)V
-}
-
