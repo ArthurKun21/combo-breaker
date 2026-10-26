@@ -2,7 +2,8 @@ name: ABI Validation
 
 on:
   push:
-    branches: [ development ]
+    branches:
+      - development
     paths:
       - gradle/**
       - build-logic/**
