@@ -61,4 +61,8 @@ jobs:
 
       - name: Build library
         run: |
-          ./gradlew :combo-breaker:assembleRelease combo-breaker-material3:assembleRelease combo-breaker-demo:assembleRelease
+          ./gradlew :combo-breaker:assembleRelease combo-breaker-material3:assembleRelease
+          
+      - name: Build App
+        run: |
+          ./gradlew :combo-breaker-demo:assembleRelease
