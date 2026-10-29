@@ -1,0 +1,54 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - development
+    paths:
+      - gradle/**
+      - build-logic/**
+      - combo-breaker/**
+      - combo-breaker-demo/**
+      - combo-breaker-material3/**
+      - build.gradle.kts
+      - gradle.properties
+      - gradlew
+      - gradlew.bat
+      - settings.gradle.kts
+  pull_request:
+    paths:
+      - gradle/**
+      - build-logic/**
+      - combo-breaker/**
+      - combo-breaker-demo/**
+      - combo-breaker-material3/**
+      - build.gradle.kts
+      - gradle.properties
+      - gradlew
+      - gradlew.bat
+      - settings.gradle.kts
+
+  workflow_dispatch:
+
+env:
+  GRADLE_OPTS: '-Dorg.gradle.jvmargs="-Xmx4g -XX:MaxMetaspaceSize=1g -XX:+UseParallelGC"'
+
+
+concurrency:
+  group: ${{ github.ref }}-ci
+  cancel-in-progress: ${{ github.ref != 'refs/heads/development' }}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: $/.github/actions/setup-java-project
+
+      - name: Build library
+        run: |
+          ./gradlew :combo-breaker:assembleRelease combo-breaker-material3:assembleRelease
+          
+      - name: Build App
+        run: |
+          ./gradlew :combo-breaker-demo:assembleRelease

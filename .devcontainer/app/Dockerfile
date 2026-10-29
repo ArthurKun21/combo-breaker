@@ -54,8 +54,8 @@ RUN yes | sdkmanager --licenses \
     && sdkmanager --update \
     && sdkmanager \
         "platform-tools" \
-        "platforms;android-37.0" \
-        "build-tools;37.0.0"
+        "platforms;android-37.1" \
+        "build-tools;37.1.0"
 
 # ---- Update Android command line tools using CLI ----
 RUN android sdk install cmdline-tools/latest

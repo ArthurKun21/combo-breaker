@@ -1,0 +1,42 @@
+[versions]
+agp = "9.5.0"
+kotlin = "2.4.21"
+
+# Compose Multiplatform stable. On Android, CMP resolves to Jetpack Compose 1.12.1.
+compose = "1.12.2"
+# CMP material3 is versioned separately; 1.9.0 is the latest stable release.
+compose-material3 = "1.9.0"
+
+core-ktx = "1.19.1"
+lifecycle = "2.11.0"
+activity-compose = "1.13.0"
+pathway = "0.19.1"
+
+dokka = "2.2.0"
+vanniktech-maven-publish = "0.37.0"
+
+spotless = "8.10.4"
+ktlint-core = "1.8.0"
+
+[libraries]
+androidx-core-ktx = { module = "androidx.core:core-ktx", version.ref = "core-ktx" }
+androidx-lifecycle-runtime-ktx = { module = "androidx.lifecycle:lifecycle-runtime-ktx", version.ref = "lifecycle" }
+androidx-activity-compose = { module = "androidx.activity:activity-compose", version.ref = "activity-compose" }
+
+compose-ui = { module = "org.jetbrains.compose.ui:ui", version.ref = "compose" }
+compose-material3 = { module = "org.jetbrains.compose.material3:material3", version.ref = "compose-material3" }
+
+pathway = { module = "dev.romainguy:pathway", version.ref = "pathway" }
+
+# Gradle plugin artifacts used by build-logic convention plugins
+android-gradle-plugin = { module = "com.android.tools.build:gradle", version.ref = "agp" }
+compose-compiler-gradle = { module = "org.jetbrains.kotlin:compose-compiler-gradle-plugin", version.ref = "kotlin" }
+dokka-gradle-plugin = { module = "org.jetbrains.dokka:dokka-gradle-plugin", version.ref = "dokka" }
+vanniktech-maven-publish-plugin = { module = "com.vanniktech:gradle-maven-publish-plugin", version.ref = "vanniktech-maven-publish" }
+spotless-gradle = { group = "com.diffplug.spotless", name = "spotless-plugin-gradle", version.ref = "spotless" }
+
+[plugins]
+android-application = { id = "com.android.application", version.ref = "agp" }
+android-library = { id = "com.android.library", version.ref = "agp" }
+kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
+spotless = { id = "com.diffplug.spotless", version.ref = "spotless" }

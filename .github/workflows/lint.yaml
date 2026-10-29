@@ -1,0 +1,31 @@
+name: Run Lint
+
+on:
+  pull_request:
+    paths-ignore:
+      - '**.md'
+      - '**.txt'
+      - '.gitignore'
+      - 'LICENSE'
+      - 'art/**'
+      - '.github/**'
+      - '!.github/workflows/**'
+      - 'renovate.json'
+
+env:
+  GRADLE_OPTS: '-Dorg.gradle.jvmargs="-Xmx4g -XX:MaxMetaspaceSize=1g -XX:+UseParallelGC"'
+
+concurrency:
+  group: ${{ github.ref }}-lint
+  cancel-in-progress: true
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: $/.github/actions/setup-java-project
+
+      - name: Run Lint
+        run: |
+          ./gradlew spotlessCheck

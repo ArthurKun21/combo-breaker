@@ -1,0 +1,6 @@
+{
+    "githubPullRequests.remotes": [
+        "origin"
+    ],
+    "githubPullRequests.createDefaultBaseBranch": "repositoryDefault"
+}
