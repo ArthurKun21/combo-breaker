@@ -17,7 +17,7 @@ env:
   JAVA_DISTRO: 'temurin'
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  group: ${{ github.ref }}-lint
   cancel-in-progress: true
 
 jobs:
