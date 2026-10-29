@@ -1,0 +1,24 @@
+pluginManagement {
+    includeBuild("build-logic")
+
+    repositories {
+        google()
+        mavenCentral()
+        gradlePluginPortal()
+    }
+}
+
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+
+    repositories {
+        google()
+        mavenCentral()
+    }
+}
+
+rootProject.name = "Combo Breaker"
+
+include(":combo-breaker")
+include(":combo-breaker-material3")
+include(":combo-breaker-demo")
