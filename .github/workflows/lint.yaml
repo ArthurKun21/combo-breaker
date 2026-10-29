@@ -13,8 +13,7 @@ on:
       - 'renovate.json'
 
 env:
-  JAVA_VERSION: 21
-  JAVA_DISTRO: 'temurin'
+  GRADLE_OPTS: '-Dorg.gradle.jvmargs="-Xmx4g -XX:MaxMetaspaceSize=1g -XX:+UseParallelGC"'
 
 concurrency:
   group: ${{ github.ref }}-lint
@@ -25,19 +24,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v7.0.1
-
-      - name: Validate Gradle Wrapper
-        uses: gradle/actions/wrapper-validation@v6.3.0
-
-      - name: Set up JDK ${{ env.JAVA_VERSION }}
-        uses: actions/setup-java@v6.0.0
-        with:
-          java-version: ${{ env.JAVA_VERSION }}
-          distribution: ${{ env.JAVA_DISTRO }}
-
-      - name: Set up gradle
-        uses: gradle/actions/setup-gradle@v6.3.0
+      - uses: $/.github/actions/setup-java-project
 
       - name: Run Lint
         run: |
