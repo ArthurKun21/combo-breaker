@@ -8,14 +8,15 @@ for Jetpack Compose that allows to flow text around arbitrary shapes over multip
 `TextFlow` composable behaves as a `Box` layout and will automatically flow the text content
 around its children.
 
-* [Features](#features)
-* [Design Systems](#design-systems)
-* [Examples](#examples)
-* [Maven](#maven)
-* [Building](#building)
-* [Roadmap](#roadmap)
-* [License](#license)
-* [Attribution](#attribution)
+- [Combo Breaker](#combo-breaker)
+  - [Features](#features)
+  - [Design Systems](#design-systems)
+  - [Examples](#examples)
+  - [Maven](#maven)
+  - [Building](#building)
+  - [Roadmap](#roadmap)
+  - [License](#license)
+  - [Attribution](#attribution)
 
 ## Features
 
@@ -165,7 +166,7 @@ dependencies {
 The project builds with the Gradle wrapper (no local installation required):
 
 ```shell
-./gradlew build          # assemble all modules
+./gradlew :combo-breaker:compileDebugKotlin :combo-breaker-material3:compileDebugKotlin
 ./gradlew spotlessCheck  # verify formatting/lint (spotlessCheck runs in CI)
 ```
 
@@ -181,7 +182,7 @@ The project builds with the Gradle wrapper (no local installation required):
 - BiDi text hasn't been tested yet, and probably doesn't work properly (RTL layouts are however
   supported for the placement of flow shapes and the handling of columns).
 - Improve performance of contours extraction from an image (could be multi-threaded for instance).
-- Investigate an alternative and simpler way to handle placement around shapes (beam cast instead 
+- Investigate an alternative and simpler way to handle placement around shapes (beam cast instead
   of the purely geometric approach that currently requires a lot of intersection work).
 - Support flowing text inside shapes.
 
