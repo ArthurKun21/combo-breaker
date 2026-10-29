@@ -29,6 +29,7 @@ import androidx.compose.ui.graphics.ShaderBrush
 import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.isSpecified
+import androidx.compose.ui.graphics.nativePaint
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
@@ -86,7 +87,7 @@ private fun TextPaint.setBrush(brush: Brush?, size: Size, alpha: Float = Float.N
             p,
             if (alpha.isNaN()) this.alpha / 255.0f else alpha.coerceIn(0f, 1f),
         )
-        val fwkPaint = p.asFrameworkPaint()
+        val fwkPaint = p.nativePaint
         this.alpha = fwkPaint.alpha
         this.shader = fwkPaint.shader
         this.color = fwkPaint.color

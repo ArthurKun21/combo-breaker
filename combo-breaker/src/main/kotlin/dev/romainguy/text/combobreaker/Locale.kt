@@ -20,7 +20,7 @@ import android.text.TextPaint
 import androidx.compose.ui.text.intl.Locale
 import androidx.compose.ui.text.intl.LocaleList
 
-internal fun Locale.toJavaLocale(): java.util.Locale = java.util.Locale(language, region)
+internal fun Locale.toJavaLocale(): java.util.Locale = platformLocale
 
 internal object LocaleListHelper {
     fun setTextLocales(textPaint: TextPaint, localeList: LocaleList) {
