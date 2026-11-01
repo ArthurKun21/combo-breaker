@@ -21,4 +21,5 @@ rootProject.name = "Combo Breaker"
 
 include(":combo-breaker")
 include(":combo-breaker-material3")
-include(":combo-breaker-demo")
+include(":demo:combo-breaker-demo")
+include(":demo:combo-breaker-demo-android")
