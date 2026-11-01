@@ -26,7 +26,10 @@ around its children.
 - Arbitrary shapes (any `Path`)
 - Justification
 - Hyphenation
-- Compatible with API 24+ (justification is emulated below API 29, hyphenation requires API 33+)
+- Kotlin Multiplatform: Android and JVM desktop
+- Compatible with Android API 24+ (justification is emulated below API 29, hyphenation requires
+  API 33+); on desktop, justification is emulated word-by-word and hyphenation is not computed
+  yet
 
 ## Design Systems
 
