@@ -16,10 +16,6 @@
 
 package dev.romainguy.text.combobreaker
 
-import android.graphics.Canvas
-import android.graphics.Paint
-import android.graphics.RectF
-import android.os.Build
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.LayoutScopeMarker
 import androidx.compose.runtime.Composable
@@ -40,11 +36,9 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.PathOperation
 import androidx.compose.ui.graphics.TileMode
-import androidx.compose.ui.graphics.asAndroidPath
 import androidx.compose.ui.graphics.drawscope.ContentDrawScope
-import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
-import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.layout.LayoutCoordinates
@@ -75,6 +69,10 @@ import dev.romainguy.text.combobreaker.FlowType.OutsideEnd
 import dev.romainguy.text.combobreaker.FlowType.OutsideLeft
 import dev.romainguy.text.combobreaker.FlowType.OutsideRight
 import dev.romainguy.text.combobreaker.FlowType.OutsideStart
+import io.github.arthurkun21.text.combobreaker.RectF
+import io.github.arthurkun21.text.combobreaker.createPlatformTextPaint
+import io.github.arthurkun21.text.combobreaker.drawTextSegment
+import io.github.arthurkun21.text.combobreaker.inflatePath
 import kotlin.math.max
 
 /**
@@ -435,37 +433,19 @@ public fun BasicTextFlow(
         measurePolicy = measurePolicy,
         modifier = modifier
             .drawBehind {
-                drawIntoCanvas {
-                    val c = it.nativeCanvas
-                    val textSegmentCount = state.textSegments.size
+                val textSegmentCount = state.textSegments.size
 
-                    for (i in 0 until textSegmentCount) {
-                        val segment = state.textSegments[i]
-
-                        if (Build.VERSION.SDK_INT >= 29) {
-                            with(segment) {
-                                paint.startHyphenEdit = startHyphen
-                                paint.endHyphenEdit = endHyphen
-                                paint.wordSpacing = justifyWidth
-
-                                c.drawText(buffer, start, end, x, y, paint)
-                            }
-                        } else {
-                            // Paint hyphen edit and word spacing APIs do not exist below
-                            // API 29. Hyphen edits are never needed below API 33, and word
-                            // spacing is emulated by drawing words one by one
-                            c.drawTextPreApi29(segment)
-                        }
-                    }
+                for (i in 0 until textSegmentCount) {
+                    drawTextSegment(state.textSegments[i])
                 }
             }
             // Debug code
             .thenIf(debugOverlay) {
                 drawWithCache {
                     val stripeFill = debugStripeFill()
-                    val paint = createTextPaint(state.resolver, style, state.density)
+                    val paint = createPlatformTextPaint(state.resolver, style, state.density)
 
-                    val lineHeight = paint.fontMetrics.descent - paint.fontMetrics.ascent
+                    val lineHeight = paint.lineHeight
                     val y = debugLinePosition
                     val y1 = y - lineHeight / 2.0f
                     val y2 = y + lineHeight / 2.0f
@@ -510,44 +490,6 @@ public fun BasicTextFlow(
                     }
             },
     )
-}
-
-/**
- * Draws a text segment below API 29, where the word spacing paint API is unavailable.
- * When the segment requires justification or line shrinking, words are drawn one by one,
- * adding the segment's justify width to the advance of each stretchable space (U+0020)
- * to mirror the behavior of the platform's word spacing.
- *
- * Hyphen edits are never applied below API 29: hyphenation is only computed on API 33+,
- * so hyphen edits are always `NO_HYPHEN_EDIT`.
- */
-private fun Canvas.drawTextPreApi29(segment: TextSegment) {
-    with(segment) {
-        if (justifyWidth == 0.0f) {
-            drawText(buffer, start, end, x, y, paint)
-            return
-        }
-
-        var cursor = start
-        var wordStart = start
-        var cursorX = x
-
-        while (cursor < end) {
-            if (buffer[cursor] == ' ') {
-                if (wordStart < cursor) {
-                    drawText(buffer, wordStart, cursor, cursorX, y, paint)
-                    cursorX += paint.measureText(buffer, wordStart, cursor)
-                }
-                cursorX += paint.measureText(buffer, cursor, cursor + 1) + justifyWidth
-                wordStart = cursor + 1
-            }
-            cursor++
-        }
-
-        if (wordStart < end) {
-            drawText(buffer, wordStart, end, cursorX, y, paint)
-        }
-    }
 }
 
 @Stable
@@ -604,14 +546,7 @@ private fun buildFlowShapes(
 }
 
 private fun expandAndClipPath(path: Path, margin: Float, clip: Path) {
-    if (margin > 0.0f) {
-        // Note: see comment below
-        val androidPath = path.asAndroidPath()
-        Paint().apply {
-            style = Paint.Style.FILL_AND_STROKE
-            strokeWidth = margin * 2.0f
-        }.getFillPath(androidPath, androidPath)
-    }
+    val expanded = if (margin > 0.0f) inflatePath(path, margin) else path
 
     // TODO: Our layout algorithm does not need to intersect the path with the larger
     //       containment area, but this has the nice side effect of cleaning up paths tremendously
@@ -619,9 +554,7 @@ private fun expandAndClipPath(path: Path, margin: Float, clip: Path) {
     //       number of segments and cleans up self overlaps. It is however quite expensive so
     //       we should try to get rid of it by getting rid of getFillPath() and finding another
     //       way to create margins
-    path
-        .asAndroidPath()
-        .op(clip.asAndroidPath(), android.graphics.Path.Op.INTERSECT)
+    expanded.op(expanded, clip, PathOperation.Intersect)
 }
 
 private fun Placeable.PlacementScope.placeElement(

@@ -33,7 +33,7 @@ internal class StaticLayoutLines(
     paragraph: String,
     styles: List<Interval<TextStyle>>,
     paragraphOffset: Int,
-    paintForStyle: (TextStyle) -> TextPaint,
+    paintForStyle: (TextStyle) -> PlatformTextPaint,
     width: Float,
 ) : MeasuredLines {
     private val text: String
@@ -52,7 +52,7 @@ internal class StaticLayoutLines(
             if (interval.end > paragraphOffset) {
                 val start = max(0, (interval.start - paragraphOffset).toInt())
                 val end = (interval.end - paragraphOffset).toInt()
-                val paint = paintForStyle(interval.data!!)
+                val paint = paintForStyle(interval.data!!).paint
                 runs += StyleRun(start, end, paint)
                 spannable.setSpan(StylePaintSpan(paint), start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
             }
