@@ -16,8 +16,8 @@
 
 package dev.romainguy.text.combobreaker
 
-import android.graphics.PointF
-import android.graphics.RectF
+import io.github.arthurkun21.text.combobreaker.PointF
+import io.github.arthurkun21.text.combobreaker.RectF
 import kotlin.math.abs
 
 // Clipping flags indicating where clipping must occur

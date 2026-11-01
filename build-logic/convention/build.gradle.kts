@@ -7,6 +7,7 @@ group = "combobreaker.buildlogic"
 dependencies {
     implementation(libs.android.gradle.plugin)
     implementation(libs.compose.compiler.gradle)
+    implementation(libs.kotlin.gradle.plugin)
     implementation(libs.spotless.gradle)
     implementation(libs.dokka.gradle.plugin)
     implementation(libs.vanniktech.maven.publish.plugin)
@@ -25,6 +26,10 @@ gradlePlugin {
         register("androidLibrary") {
             id = "combo-breaker.android.library"
             implementationClass = "AndroidLibraryConventionPlugin"
+        }
+        register("kmpLibrary") {
+            id = "combo-breaker.kotlin.multiplatform"
+            implementationClass = "KmpLibraryConventionPlugin"
         }
         register("androidApplication") {
             id = "combo-breaker.android.application"

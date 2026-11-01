@@ -16,9 +16,6 @@
 
 package dev.romainguy.text.combobreaker
 
-import android.graphics.RectF
-import android.os.Build
-import android.text.TextPaint
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
@@ -26,10 +23,13 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.LayoutDirection
-import io.github.arthurkun21.text.combobreaker.LineBreakerLines
 import io.github.arthurkun21.text.combobreaker.MeasuredLines
 import io.github.arthurkun21.text.combobreaker.NO_HYPHEN_EDIT
-import io.github.arthurkun21.text.combobreaker.StaticLayoutLines
+import io.github.arthurkun21.text.combobreaker.PlatformTextPaint
+import io.github.arthurkun21.text.combobreaker.RectF
+import io.github.arthurkun21.text.combobreaker.createMeasuredLines
+import io.github.arthurkun21.text.combobreaker.createPlatformTextPaint
+import io.github.arthurkun21.text.combobreaker.supportsWordSpacing
 import kotlin.math.max
 import kotlin.math.min
 
@@ -43,12 +43,9 @@ import kotlin.math.min
  * @param buffer The text buffer to render text from (see [start] and [end].
  * @param start The start offset in the [buffer] buffer.
  * @param end The end offset in the [buffer] buffer.
- * @param startHyphen The start hyphen value for this class, as expected by
- * [TextPaint.setStartHyphenEdit].
- * @param endHyphen The start hyphen value for this class, as expected by
- * [TextPaint.setEndHyphenEdit].
- * @param justifyWidth The word spacing required to justify this line of text, as expected by
- * [TextPaint.setWordSpacing].
+ * @param startHyphen The start hyphen edit to apply to this segment.
+ * @param endHyphen The end hyphen edit to apply to this segment.
+ * @param justifyWidth The word spacing required to justify this line of text.
  * @param x The x coordinate of where to draw the line of text.
  * @param y The y coordinate of where to draw the line of text.
  * @param paint The paint to use to render this line of text.
@@ -62,7 +59,7 @@ internal class TextSegment(
     val justifyWidth: Float,
     val x: Float,
     val y: Float,
-    val paint: TextPaint,
+    val paint: PlatformTextPaint,
 )
 
 /**
@@ -253,17 +250,13 @@ internal fun layoutTextFlow(
 
                         if (cursor < endOffset) {
                             if (justifyWidth != 0.0f) {
-                                if (Build.VERSION.SDK_INT >= 29) {
-                                    with(paint) {
-                                        startHyphenEdit = localStartHyphen
-                                        endHyphenEdit = localEndHyphen
-                                        wordSpacing = justifyWidth
-                                    }
+                                paint.setJustificationState(localStartHyphen, localEndHyphen, justifyWidth)
+                                if (supportsWordSpacing) {
                                     x += paint.measureText(paragraph, start, end)
                                 } else {
-                                    // Word spacing does not exist below API 29 and is emulated
-                                    // at draw time: add the extra spacing of each stretchable
-                                    // space in this segment to its advance
+                                    // Word spacing is not natively supported on this platform and
+                                    // is emulated at draw time: add the extra spacing of each
+                                    // stretchable space in this segment to its advance
                                     x += paint.measureText(paragraph, start, end) +
                                         justifyWidth * countStretchableSpaces(paragraph, start, end)
                                 }
@@ -321,9 +314,7 @@ internal fun layoutTextFlow(
 
 /**
  * Measures and breaks the remaining text of the current paragraph at the specified width,
- * using the platform line breaker (`android.graphics.text.LineBreaker` and
- * `android.graphics.text.MeasuredText`) on API 29 and above and a `StaticLayout`-based
- * fallback on API 24 to 28.
+ * using the platform's line-breaking engine selected by [createMeasuredLines].
  *
  * The measured text always starts at the current paragraph offset: styles must cover the
  * entire measured text, and the line breaker therefore expects to compute breaks over it.
@@ -333,28 +324,14 @@ private fun computeMeasuredLines(
     width: Float,
     hyphenation: TextFlowHyphenation,
 ): MeasuredLines {
-    val styles = state.currentParagraphStyles()
-    val paragraphOffset = state.paragraphOffset
-    val paragraph = state.currentParagraph
-
-    return if (Build.VERSION.SDK_INT >= 29) {
-        LineBreakerLines(
-            paragraph.toCharArray(paragraphOffset),
-            styles,
-            paragraphOffset,
-            state::paintForStyle,
-            width,
-            hyphenation,
-        )
-    } else {
-        StaticLayoutLines(
-            paragraph.substring(paragraphOffset),
-            styles,
-            paragraphOffset,
-            state::paintForStyle,
-            width,
-        )
-    }
+    return createMeasuredLines(
+        state.currentParagraph,
+        state.currentParagraphStyles(),
+        state.paragraphOffset,
+        state::paintForStyle,
+        width,
+        hyphenation,
+    )
 }
 
 /**
@@ -517,7 +494,7 @@ private class TextLayoutState(
     val stylesQuery = ArrayList<Interval<SpanStyle>>(16)
 
     // Cache of paints used to measurement and drawing
-    val paints = mutableMapOf<TextStyle, TextPaint>()
+    val paints = mutableMapOf<TextStyle, PlatformTextPaint>()
 
     // Lines of the remaining text of the current paragraph, measured at the last slot
     // width we used. Recomputed whenever the layout algorithm consumes text at a
@@ -619,7 +596,7 @@ private class TextLayoutState(
 
     // Returns a paint for the specified style. The paint is cached as needed
     fun paintForStyle(style: TextStyle) = paints.computeIfAbsent(style) {
-        createTextPaint(resolver, style, density)
+        createPlatformTextPaint(resolver, style, density)
     }
 }
 
