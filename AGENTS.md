@@ -44,11 +44,23 @@ provides `String` and `AnnotatedString` overloads that read `LocalTextStyle` as 
 and delegate everything to `BasicTextFlow`. Keep this module a thin wrapper — all layout logic
 belongs in `:combo-breaker`.
 
-### `:combo-breaker-demo`
+### `:demo:combo-breaker-demo`
 
-Single-Activity Android demo app showing flow shapes, multiple columns, justification and
-hyphenation (`ComboBreakerActivity.kt` + `ui/theme/`). Depends on `:combo-breaker-material3`
-(its Android target) and `dev.romainguy:pathway`. Not yet converted to KMP.
+Kotlin Multiplatform demo sample (targets: `android`, `jvm`) holding the shared demo UI:
+flow shapes, multiple columns, justification and hyphenation. `TextFlowDemo.kt`
+(`dev.romainguy.text.combobreaker.demo`, commonMain) hosts the demo composables with the
+public `ComboBreakerDemoApp()` entry; `ui/theme/` is the Material3 theme (dynamic colors via
+the `dynamicColorScheme` expect/actual in `io.github.arthurkun21.text.combobreaker.demo`).
+Images are Compose Multiplatform resources (`commonMain/composeResources/drawable/`,
+generated `Res.drawable.*` accessors); `ImageTracing.kt` is a multiplatform port of
+pathway's marching-squares tracer used to extract flow shapes from the images. The desktop
+entrypoint is `jvmMain/.../Main.kt`, wired through `compose.desktop.application`. Depends on
+`:combo-breaker-material3`. Configured by `combo-breaker.kotlin.multiplatform.sample`.
+
+### `:demo:combo-breaker-demo-android`
+
+Thin Android application entrypoint (`ComboBreakerActivity.kt` = `setContent { ComboBreakerDemoApp() }`
++ manifest/launcher resources). Configured by `combo-breaker.android.application`.
 
 ### `build-logic`
 
@@ -59,9 +71,14 @@ thin — change build behavior in the convention plugins, not in the modules:
   `org.jetbrains.kotlin.multiplatform` + `com.android.kotlin.multiplatform.library`, configures
   `explicitApi()`, the android target (compileSdk/minSdk/jvmTarget from `AndroidConfig`), the
   `jvm()` target, and `-Xexpect-actual-classes`
+- `combo-breaker.kotlin.multiplatform.sample` — KMP setup for the demo sample: same as
+  `combo-breaker.kotlin.multiplatform` but without `explicitApi()`, and it enables
+  `androidResources` on the android target (required by Compose Multiplatform resources)
 - `combo-breaker.android.library` / `combo-breaker.android.application` — Android-only modules
-  (the demo)
+  (the demo app entrypoint)
 - `combo-breaker.compose` — Compose compiler and runtime setup
+- `combo-breaker.compose.multiplatform` — adds the `org.jetbrains.compose` plugin on top of
+  `combo-breaker.compose` (used by the demo for resource generation and the desktop application)
 - `combo-breaker.code.lint` — Spotless + ktlint
 - `combo-breaker.dokka` — API documentation
 - `combo-breaker.maven.publish` — Vanniktech Maven publish setup for Maven Central
@@ -87,7 +104,9 @@ thin — change build behavior in the convention plugins, not in the modules:
 ./gradlew spotlessCheck  # formatting/lint gate enforced in CI
 ./gradlew :combo-breaker:compileKotlinJvm :combo-breaker:assembleAndroidMain
 ./gradlew :combo-breaker-material3:compileKotlinJvm
-./gradlew :combo-breaker-demo:compileDebugKotlin
+./gradlew :demo:combo-breaker-demo-android:assembleDebug
+./gradlew :demo:combo-breaker-demo:jvmJar
+./gradlew :demo:combo-breaker-demo:run  # launches the desktop demo
 ```
 
 - Always use the Gradle wrapper; Gradle Kotlin DSL everywhere
