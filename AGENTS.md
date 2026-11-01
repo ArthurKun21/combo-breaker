@@ -3,6 +3,12 @@
 This repository contains a Jetpack Compose library that flows text around arbitrary shapes over
 multiple columns.
 
+## Git Commit Policy
+
+- **Never run `git commit` automatically.**
+- **Never run `git commit --amend` under any circumstances**.
+- If unsure whether a change should be part of an existing commit or a new one, **default to a new commit**.
+
 ## Modules
 
 ### `:combo-breaker`
@@ -14,6 +20,9 @@ The core library (Android, Jetpack Compose, no Material dependency). Package
   `TextFlowJustification`, `TextFlowHyphenation`, `TextFlowLayoutResult`, and `TextFlowScope`
   (with the `flowShape` / `flowShapes` modifiers)
 - `TextLayout.kt` — multi-column text layout pipeline
+- `MeasuredLines.kt` / `StaticLayoutLines.kt` — internal line-breaking abstraction over the
+  remaining text of a paragraph: `LineBreaker` + `MeasuredText` on API 29+, `StaticLayout`
+  fallback on API 24–28
 - `FlowShape.kt` — internal flow-shape representation: a `Path` contour flattened into segments
   and indexed as a vertical interval tree
 - `IntervalTree.kt` — interval tree used for fast per-line queries
@@ -76,6 +85,8 @@ thin — change build behavior in the convention plugins, not in the modules:
   `public` explicitly and carry KDoc; prefer `internal` for helpers
 - Files are named after their primary declaration; original upstream sources carry the Apache 2.0
   copyright header — preserve it when editing those files
+- New files are placed in the `io.github.arthurkun21.text.combobreaker` package; original upstream
+  sources stay in `dev.romainguy.text.combobreaker`
 - This is a layout library: state is handled with Compose primitives (`mutableStateOf`,
   `remember`, `derivedStateOf`, `@Immutable`/`@Stable`); no ViewModels, coroutines or Flow in the core
 
@@ -98,4 +109,8 @@ under test, mirroring its package structure.
   to avoid per-line allocations
 - Shape margins are implemented with `Path.op` unions, which is expensive on complex paths —
   see the README roadmap for known limitations (BiDi, ellipsize, margin performance)
-- Hyphenation only takes effect on API 33+, although `minSdk` is 29
+- Text is line-broken by `android.graphics.text.LineBreaker` + `MeasuredText` on API 29+ and by a
+  `StaticLayout`-based fallback (`MeasuredLines`/`StaticLayoutLines`) on API 24–28; justification
+  relies on `Paint.setWordSpacing` on API 29+ and is emulated word-by-word at draw time below,
+  which is why `minSdk` is 24
+- Hyphenation only takes effect on API 33+, although `minSdk` is 24

@@ -16,8 +16,10 @@
 
 package dev.romainguy.text.combobreaker
 
+import android.graphics.Canvas
 import android.graphics.Paint
 import android.graphics.RectF
+import android.os.Build
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.LayoutScopeMarker
 import androidx.compose.runtime.Composable
@@ -440,12 +442,19 @@ public fun BasicTextFlow(
                     for (i in 0 until textSegmentCount) {
                         val segment = state.textSegments[i]
 
-                        with(segment) {
-                            paint.startHyphenEdit = startHyphen
-                            paint.endHyphenEdit = endHyphen
-                            paint.wordSpacing = justifyWidth
+                        if (Build.VERSION.SDK_INT >= 29) {
+                            with(segment) {
+                                paint.startHyphenEdit = startHyphen
+                                paint.endHyphenEdit = endHyphen
+                                paint.wordSpacing = justifyWidth
 
-                            c.drawText(buffer, start, end, x, y, paint)
+                                c.drawText(buffer, start, end, x, y, paint)
+                            }
+                        } else {
+                            // Paint hyphen edit and word spacing APIs do not exist below
+                            // API 29. Hyphen edits are never needed below API 33, and word
+                            // spacing is emulated by drawing words one by one
+                            c.drawTextPreApi29(segment)
                         }
                     }
                 }
@@ -501,6 +510,44 @@ public fun BasicTextFlow(
                     }
             },
     )
+}
+
+/**
+ * Draws a text segment below API 29, where the word spacing paint API is unavailable.
+ * When the segment requires justification or line shrinking, words are drawn one by one,
+ * adding the segment's justify width to the advance of each stretchable space (U+0020)
+ * to mirror the behavior of the platform's word spacing.
+ *
+ * Hyphen edits are never applied below API 29: hyphenation is only computed on API 33+,
+ * so hyphen edits are always `NO_HYPHEN_EDIT`.
+ */
+private fun Canvas.drawTextPreApi29(segment: TextSegment) {
+    with(segment) {
+        if (justifyWidth == 0.0f) {
+            drawText(buffer, start, end, x, y, paint)
+            return
+        }
+
+        var cursor = start
+        var wordStart = start
+        var cursorX = x
+
+        while (cursor < end) {
+            if (buffer[cursor] == ' ') {
+                if (wordStart < cursor) {
+                    drawText(buffer, wordStart, cursor, cursorX, y, paint)
+                    cursorX += paint.measureText(buffer, wordStart, cursor)
+                }
+                cursorX += paint.measureText(buffer, cursor, cursor + 1) + justifyWidth
+                wordStart = cursor + 1
+            }
+            cursor++
+        }
+
+        if (wordStart < end) {
+            drawText(buffer, wordStart, end, cursorX, y, paint)
+        }
+    }
 }
 
 @Stable
