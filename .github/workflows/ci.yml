@@ -8,7 +8,7 @@ on:
       - gradle/**
       - build-logic/**
       - combo-breaker/**
-      - combo-breaker-demo/**
+      - demo/**
       - combo-breaker-material3/**
       - build.gradle.kts
       - gradle.properties
@@ -20,7 +20,7 @@ on:
       - gradle/**
       - build-logic/**
       - combo-breaker/**
-      - combo-breaker-demo/**
+      - demo/**
       - combo-breaker-material3/**
       - build.gradle.kts
       - gradle.properties
@@ -48,7 +48,7 @@ jobs:
       - name: Build library
         run: |
           ./gradlew :combo-breaker:assembleRelease combo-breaker-material3:assembleRelease
-          
+
       - name: Build App
         run: |
-          ./gradlew :combo-breaker-demo:assembleRelease
+          ./gradlew :demo:combo-breaker-demo-android:assembleRelease :demo:combo-breaker-demo:jvmJar
