@@ -193,3 +193,145 @@ platform split.
    modules' android target unchanged
 4. `git status`/`git diff --stat` review — confirm moves are history-preserving and no
    unrelated changes slipped in
+
+---
+
+# Demo directory restructure + demo KMP conversion (Android + JVM)
+
+## Context
+
+The library modules (`:combo-breaker`, `:combo-breaker-material3`) are already KMP; the demo
+is the last Android-only module. Goal: create a `demo/` directory, move `combo-breaker-demo`
+into it, convert it to a KMP module (Android + JVM targets) holding the shared demo UI +
+desktop entrypoint, and add a thin Android application module next to it as the Android
+entrypoint (the AGP KMP android target is library-only — an APK needs a separate
+`com.android.application` module).
+
+- Reference: `ArthurKun21/generic-datastore` `samples/preferenceComposeApp` — single KMP
+  sample module (`commonMain`/`androidMain`/`jvmMain`, `jvm()` target, desktop entry in
+  `Main.kt`) set up via a dedicated sample convention plugin (`gd.kmp.sample`).
+- Images move to **Compose Multiplatform resources**
+  (`commonMain/composeResources/drawable/` + generated `Res.drawable.*` accessors). This
+  requires the `org.jetbrains.compose` Gradle plugin (for accessor generation and
+  `compose.desktop.application`) — a departure from the library modules, which use raw CMP
+  coordinates only.
+- Pathway publishes **only an Android AAR** (verified in its Gradle module metadata): its
+  Apache-2.0 marching-squares tracer (`Image.kt` + `Contours.kt`, ~400–450 lines, operates
+  on an `IntArray` of pixels) is **ported into the demo's commonMain**; both platforms trace
+  identically and the pathway dependency is dropped.
+
+## Step 1 — Restructure into `demo/` (all moves via `git mv`)
+
+1. Delete the stale `demo/` contents (only gitignored build outputs + empty dirs from an
+   earlier attempt), then `git mv combo-breaker-demo demo/combo-breaker-demo`.
+2. Inside the moved module (git mv, Apache headers preserved):
+   - `src/main/java/.../demo/ui/theme/{Color,Shape,Theme,Type}.kt` →
+     `src/commonMain/kotlin/dev/romainguy/text/combobreaker/demo/ui/theme/`
+   - `src/main/java/.../demo/ComboBreakerActivity.kt` →
+     `demo/combo-breaker-demo-android/src/main/java/dev/romainguy/text/combobreaker/demo/`
+     (edited down to a thin shell)
+   - `src/main/res/drawable-xxhdpi/{microphone,badge,letter_t}.png`, `hearts.png`,
+     `landscape.jpg` → `src/commonMain/composeResources/drawable/` (unqualified dir:
+     deterministic full-res bytes on both platforms)
+   - `mipmap-anydpi-v26/*`, `drawable/ic_launcher_*.xml`, `values/strings.xml`,
+     `values/themes.xml`, `proguard-rules.pro` → `demo/combo-breaker-demo-android/`
+   - Drop `drawable/baseline_line_style_24.xml` (unreferenced anywhere)
+3. `settings.gradle.kts`: replace `include(":combo-breaker-demo")` with
+   `include(":demo:combo-breaker-demo")` + `include(":demo:combo-breaker-demo-android")`.
+
+## Step 2 — Build setup (mirrors the reference's convention-plugin structure)
+
+**`gradle/libs.versions.toml`**: add
+`compose-gradle-plugin = { module = "org.jetbrains.compose:compose-gradle-plugin", version.ref = "compose" }`
+(libraries) and `jetbrains-compose = { id = "org.jetbrains.compose", version.ref = "compose" }`
+(plugins); remove the now-unused `pathway` alias/version.
+
+**`build-logic/convention/build.gradle.kts`**: add the compose-gradle-plugin classpath dep;
+register two plugins:
+
+- `combo-breaker.compose.multiplatform` → **`ComposeMultiplatformConventionPlugin`**:
+  applies `combo-breaker.compose` + `org.jetbrains.compose`
+- `combo-breaker.kotlin.multiplatform.sample` → **`KmpSampleConventionPlugin`** (modeled on
+  the reference's `gd.kmp.sample` + existing `KmpLibraryConventionPlugin`): applies
+  kotlin-multiplatform, android-kmp-library, compose-multiplatform, code.lint;
+  `applyDefaultHierarchyTemplate()`; **no `explicitApi()`** (demo, not library); android
+  target (`KotlinMultiplatformAndroidLibraryTarget`) gets compileSdk/minSdk from
+  `AndroidConfig` and `androidResources.enable = true` (required for resources per the CMP
+  docs); `jvm()` with JVM_21; `-Xexpect-actual-classes`
+
+**Root `build.gradle.kts`**: `alias(libs.plugins.jetbrains.compose) apply false`.
+
+## Step 3 — `demo/combo-breaker-demo` (KMP sample module)
+
+**Build file**: plugin `combo-breaker.kotlin.multiplatform.sample`;
+`kotlin { android { namespace = "dev.romainguy.text.combobreaker.demo.shared" } }` (distinct
+from the app's namespace); `commonMain.dependencies { api(project(":combo-breaker-material3")); implementation(compose.components.resources) }`;
+`jvmMain.dependencies { implementation(compose.desktop.currentOs) }`; and
+`compose.desktop.application { mainClass = "io.github.arthurkun21.text.combobreaker.demo.MainKt" }`.
+
+**commonMain**:
+
+- `TextFlowDemo.kt` (package `dev.romainguy.text.combobreaker.demo`, derives from
+  `ComboBreakerActivity.kt`): moved composables `TextFlowDemo`, `DemoControls`,
+  `MaterialDemoSetup` (private → internal) plus a public `ComboBreakerDemoApp()` =
+  `MaterialDemoSetup { TextFlowDemo() }` — the single entry both entrypoints call. Bitmap
+  decoding blocks replaced by `rememberDemoAssets()`; the `/2` microphone downscale
+  is dropped (trace at full res, same shape). Sample text, justification/hyphenation state,
+  and `flowShape`/`flowShapes` usage unchanged.
+- `ui/theme/` files unchanged except **`Theme.kt`**: the `Build.VERSION.SDK_INT >= S`
+  dynamic-color branch becomes
+  `(if (dynamicColor) dynamicColorScheme(darkTheme) else null) ?: if (darkTheme) dark else light`.
+- New files in package `io.github.arthurkun21.text.combobreaker.demo`:
+  - `ImageTracing.kt` — faithful port of pathway's marching squares (`Image.kt` +
+    `Contours.kt`, Apache 2.0): `ImageBitmap.toPath(alphaThreshold, minAngle): Path` and
+    `ImageBitmap.toPaths(): List<Path>`, reading pixels via the common
+    `ImageBitmap.toPixelMap()` (fallback: tiny expect/actual pixel reader). No platform
+    branches, no pathway.
+  - `DemoAssets.kt` — `class DemoAsset(bitmap: ImageBitmap, shapes: List<Path>)`,
+    `class DemoAssets(...)`, `@Composable fun rememberDemoAssets()`: decodes `Res.drawable.*`
+    via the synchronous `org.jetbrains.compose.resources.imageResource` (the generated
+    `Res.readBytes` is suspend, and the demo loads synchronously like the original);
+    traces microphone (`alphaThreshold = 0.5f`, as today), badge (defaults) and hearts
+    (`toPaths()`); letter_t/landscape stay plain bitmaps.
+  - `DynamicColorScheme.kt` — `@Composable expect fun dynamicColorScheme(darkTheme: Boolean): ColorScheme?`
+
+**androidMain**: `DynamicColorScheme.android.kt` — the `SDK_INT >= S` + `LocalContext` +
+`dynamicDark/LightColorScheme` branch moved verbatim. No extra deps.
+
+**jvmMain**: `Main.kt` — `fun main() = application { Window(onCloseRequest = ::exitApplication,
+title = "Combo Breaker Demo", state = rememberWindowState(720.dp, 1280.dp)) { ComboBreakerDemoApp() } }`;
+`DynamicColorScheme.jvm.kt` returns `null`.
+
+## Step 4 — `demo/combo-breaker-demo-android` (Android entrypoint)
+
+New app module via the existing `combo-breaker.android.application` +
+`combo-breaker.compose` conventions (unchanged build logic): namespace/applicationId
+`dev.romainguy.text.combobreaker.demo` (unchanged installed id), same release
+buildType/packaging config as today; deps: `implementation(project(":demo:combo-breaker-demo"))`,
+`libs.androidx.activity.compose`, `libs.androidx.core.ktx`,
+`libs.androidx.lifecycle.runtime.ktx`. The moved `ComboBreakerActivity.kt` is trimmed to:
+`enableEdgeToEdge()` + `setContent { ComboBreakerDemoApp() }`. Manifest (launcher activity)
+unchanged; res = moved launcher icons + strings + themes.
+
+## Step 5 — CI + docs
+
+- `.github/workflows/ci.yml`: paths `combo-breaker-demo/**` → `demo/**`; build step →
+  `./gradlew :demo:combo-breaker-demo-android:assembleRelease` (+ `:demo:combo-breaker-demo:jvmJar`).
+- `AGENTS.md`: rewrite the demo module section — `:demo:combo-breaker-demo` (KMP sample,
+  android+jvm, compose resources, desktop entrypoint via `compose.desktop.application`) +
+  `:demo:combo-breaker-demo-android` (Android app entrypoint); note the two new convention
+  plugins and that the pathway dependency left the demo.
+
+## Out of scope
+
+Desktop distribution/packaging config (dmg/msi/deb), iOS targets, pathway library changes,
+JVM hyphenation/RTL parity (tracked separately).
+
+## Verification
+
+1. `./gradlew build spotlessCheck` — all modules, all targets compile; CI formatting gate passes.
+2. `./gradlew :demo:combo-breaker-demo-android:assembleDebug` — Android APK entrypoint builds.
+3. `./gradlew :demo:combo-breaker-demo:run` — desktop window launches, skiko natives load,
+   shapes render (timeout-kill after confirming).
+4. `git status` review — moves are history-preserving; scope limited to demo + settings +
+   build-logic + CI + docs. No commits (per repo policy).
