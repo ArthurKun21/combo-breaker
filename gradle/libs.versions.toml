@@ -12,7 +12,7 @@ lifecycle = "2.11.0"
 activity-compose = "1.13.0"
 pathway = "0.19.1"
 
-dokka = "2.2.0"
+dokka = "2.3.0"
 vanniktech-maven-publish = "0.37.0"
 
 spotless = "8.11.0"
