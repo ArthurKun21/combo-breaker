@@ -18,7 +18,6 @@ package dev.romainguy.text.combobreaker
 
 import android.graphics.Paint
 import android.graphics.Typeface
-import android.os.Build
 import android.text.TextPaint
 import androidx.compose.runtime.State
 import androidx.compose.ui.geometry.Size
@@ -37,7 +36,6 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontSynthesis
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.intl.Locale
 import androidx.compose.ui.text.intl.LocaleList
 import androidx.compose.ui.text.style.BaselineShift
 import androidx.compose.ui.text.style.TextDecoration
@@ -130,16 +128,7 @@ public fun TextPaint.applySpanStyle(
     }
 
     if (style.localeList != null && style.localeList != LocaleList.current) {
-        if (Build.VERSION.SDK_INT >= 24) {
-            LocaleListHelper.setTextLocales(this, style.localeList!!)
-        } else {
-            val locale = if (style.localeList!!.isEmpty()) {
-                Locale.current
-            } else {
-                style.localeList!![0]
-            }
-            textLocale = locale.toJavaLocale()
-        }
+        LocaleListHelper.setTextLocales(this, style.localeList!!)
     }
 
     when (style.letterSpacing.type) {
