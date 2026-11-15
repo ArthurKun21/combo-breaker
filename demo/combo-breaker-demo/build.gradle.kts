@@ -11,7 +11,7 @@ kotlin {
         commonMain.dependencies {
             api(project(":combo-breaker-material3"))
 
-            implementation(compose.components.resources)
+            implementation(libs.compose.components.resources)
         }
 
         jvmMain.dependencies {

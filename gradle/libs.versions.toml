@@ -24,6 +24,7 @@ androidx-activity-compose = { module = "androidx.activity:activity-compose", ver
 
 compose-ui = { module = "org.jetbrains.compose.ui:ui", version.ref = "compose" }
 compose-material3 = { module = "org.jetbrains.compose.material3:material3", version.ref = "compose-material3" }
+compose-components-resources = { module = "org.jetbrains.compose.components:components-resources", version.ref = "compose" }
 
 # Gradle plugin artifacts used by build-logic convention plugins
 android-gradle-plugin = { module = "com.android.tools.build:gradle", version.ref = "agp" }
