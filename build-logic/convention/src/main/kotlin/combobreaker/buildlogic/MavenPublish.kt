@@ -12,11 +12,6 @@ private const val GitHubActorEnv = "GITHUB_ACTOR"
 private const val GitHubTokenEnv = "GITHUB_TOKEN"
 
 internal fun Project.configureMavenPublish() {
-    version = providers.environmentVariable("RELEASE_TAG")
-        .map { it.removePrefix("v") }
-        .orElse(providers.gradleProperty("VERSION_NAME"))
-        .get()
-
     extensions.getByType<PublishingExtension>().repositories.maven {
         name = "GitHubPackages"
         url = uri("https://maven.pkg.github.com/ArthurKun21/combo-breaker")
@@ -26,17 +21,12 @@ internal fun Project.configureMavenPublish() {
         }
     }
 
-    val publishGroup = group.toString()
-    val publishArtifact = name
-    val publishVersion = version.toString()
+    // The publication coordinates are derived from the project properties set by the
+    // convention plugin before the publishing plugin was applied: the group and version
+    // from the project, and the artifact id from the POM_ARTIFACT_ID property or the
+    // project name
 
     extensions.configure<MavenPublishBaseExtension> {
-        coordinates(
-            groupId = publishGroup,
-            artifactId = publishArtifact,
-            version = publishVersion,
-        )
-
         publishToMavenCentral()
         signAllPublications()
 
