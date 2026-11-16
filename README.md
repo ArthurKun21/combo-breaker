@@ -26,7 +26,7 @@ around its children.
 - Arbitrary shapes (any `Path`)
 - Justification
 - Hyphenation
-- Compatible with API 29+
+- Compatible with API 24+ (justification is emulated below API 29, hyphenation requires API 33+)
 
 ## Design Systems
 
@@ -172,7 +172,6 @@ The project builds with the Gradle wrapper (no local installation required):
 
 ## Roadmap
 
-- Backport to earlier API levels.
 - Lines containing styles of different line heights can lead to improper flow around certain shapes.
 - More comprehensive `TextFlowLayoutResult`.
 - Add support to ellipsize the last line when the entire text cannot fit in the layout area.

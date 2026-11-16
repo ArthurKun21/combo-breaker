@@ -16,10 +16,7 @@
 
 package dev.romainguy.text.combobreaker
 
-import android.graphics.Paint
 import android.graphics.RectF
-import android.graphics.text.LineBreaker
-import android.graphics.text.MeasuredText
 import android.os.Build
 import android.text.TextPaint
 import androidx.compose.ui.text.AnnotatedString
@@ -29,6 +26,10 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.LayoutDirection
+import io.github.arthurkun21.text.combobreaker.LineBreakerLines
+import io.github.arthurkun21.text.combobreaker.MeasuredLines
+import io.github.arthurkun21.text.combobreaker.NO_HYPHEN_EDIT
+import io.github.arthurkun21.text.combobreaker.StaticLayoutLines
 import kotlin.math.max
 import kotlin.math.min
 
@@ -95,13 +96,6 @@ internal fun layoutTextFlow(
     hyphenation: TextFlowHyphenation,
     flowState: TextFlowState,
 ): TextFlowLayoutResult {
-    val lineBreaker = LineBreaker.Builder()
-        .setBreakStrategy(LineBreaker.BREAK_STRATEGY_HIGH_QUALITY)
-        .setHyphenationFrequency(LineBreaker.HYPHENATION_FREQUENCY_FULL)
-        .setJustificationMode(LineBreaker.JUSTIFICATION_MODE_NONE)
-        .build()
-    val constraints = LineBreaker.ParagraphConstraints()
-
     var columnCount = columns.coerceIn(1, Int.MAX_VALUE)
     var columnWidth = (size.width.toFloat() - (columns - 1) * columnSpacing) / columnCount
     while (columnWidth <= 0.0f && columnCount > 0) {
@@ -168,46 +162,29 @@ internal fun layoutTextFlow(
                 // We now need to fit as much text as possible for the current paragraph in the list
                 // of slots we just computed
                 for (slot in slots) {
-                    // Sets the constraints width to that of our current slot
-                    constraints.width = slot.right - slot.left
+                    val slotWidth = slot.right - slot.left
 
                     // Skip empty slots
-                    if (constraints.width <= 0) continue
+                    if (slotWidth <= 0) continue
 
-                    if (constraints.width != state.lastSlotWidth) {
+                    if (slotWidth != state.lastSlotWidth) {
                         state.paragraphOffset = state.breakOffset
-
-                        // We could use toCharArray() with a pre-built array and offset, but
-                        // MeasuredText.Build wants styles to cover the entire array, and
-                        // LineBreaker therefore expects to compute breaks over the entire array
-                        val charArray = paragraph.toCharArray(state.paragraphOffset)
-                        state.measuredText = MeasuredText.Builder(charArray)
-                            .appendStyleRuns(state)
-                            .hyphenation(hyphenation)
-                            .build()
-
-                        state.result = lineBreaker.computeLineBreaks(
-                            state.measuredText,
-                            constraints,
-                            0,
-                        )
-
+                        state.lines = computeMeasuredLines(state, slotWidth, hyphenation)
                         state.lastParagraphLine = 0
                         state.lastLineOffset = 0
                     }
-                    state.lastSlotWidth = slot.width()
+                    state.lastSlotWidth = slotWidth
 
-                    val result = state.result
-                    checkNotNull(result)
+                    val lines = state.lines
 
-                    val startHyphen = result.getStartLineHyphenEdit(state.lastParagraphLine)
-                    val endHyphen = result.getEndLineHyphenEdit(state.lastParagraphLine)
-                    val lineOffset = result.getLineBreakOffset(state.lastParagraphLine)
-                    val lineWidth = result.getLineWidth(state.lastParagraphLine)
+                    val startHyphen = lines.startLineHyphenEdit(state.lastParagraphLine)
+                    val endHyphen = lines.endLineHyphenEdit(state.lastParagraphLine)
+                    val lineOffset = lines.lineBreakOffset(state.lastParagraphLine)
+                    val lineWidth = lines.lineWidth(state.lastParagraphLine)
 
                     // Tells us how far to move the cursor for the next line of text
-                    val lineAscent = -result.getLineAscent(state.lastParagraphLine)
-                    val lineDescent = result.getLineDescent(state.lastParagraphLine)
+                    val lineAscent = -lines.lineAscent(state.lastParagraphLine)
+                    val lineDescent = lines.lineDescent(state.lastParagraphLine)
 
                     // Don't enqueue a new line if we'd lay it out out of bounds
                     if (y > column.height() || (y + lineAscent + lineDescent) > column.height()) {
@@ -221,7 +198,7 @@ internal fun layoutTextFlow(
                     val justifyWidth = justify(
                         state,
                         lineWidth,
-                        constraints.width,
+                        slotWidth,
                         paragraph,
                         startOffset,
                         endOffset,
@@ -248,13 +225,13 @@ internal fun layoutTextFlow(
                         val localStartHyphen = if (start == startOffset) {
                             startHyphen
                         } else {
-                            Paint.START_HYPHEN_EDIT_NO_EDIT
+                            NO_HYPHEN_EDIT
                         }
 
                         val localEndHyphen = if (end == endOffset) {
                             endHyphen
                         } else {
-                            Paint.START_HYPHEN_EDIT_NO_EDIT
+                            NO_HYPHEN_EDIT
                         }
 
                         flowState.textSegments.add(
@@ -276,14 +253,22 @@ internal fun layoutTextFlow(
 
                         if (cursor < endOffset) {
                             if (justifyWidth != 0.0f) {
-                                with(paint) {
-                                    startHyphenEdit = localStartHyphen
-                                    endHyphenEdit = localEndHyphen
-                                    wordSpacing = justifyWidth
+                                if (Build.VERSION.SDK_INT >= 29) {
+                                    with(paint) {
+                                        startHyphenEdit = localStartHyphen
+                                        endHyphenEdit = localEndHyphen
+                                        wordSpacing = justifyWidth
+                                    }
+                                    x += paint.measureText(paragraph, start, end)
+                                } else {
+                                    // Word spacing does not exist below API 29 and is emulated
+                                    // at draw time: add the extra spacing of each stretchable
+                                    // space in this segment to its advance
+                                    x += paint.measureText(paragraph, start, end) +
+                                        justifyWidth * countStretchableSpaces(paragraph, start, end)
                                 }
-                                x += paint.measureText(paragraph, start, end)
                             } else {
-                                x += state.measuredText.getWidth(
+                                x += state.lines.width(
                                     start - state.paragraphOffset,
                                     end - state.paragraphOffset,
                                 )
@@ -335,22 +320,41 @@ internal fun layoutTextFlow(
 }
 
 /**
- * Append style runs to this [MeasuredText.Builder]. The style runs are provided by the
- * [TextLayoutState] when invoking [TextLayoutState.currentParagraphStyles].
+ * Measures and breaks the remaining text of the current paragraph at the specified width,
+ * using the platform line breaker (`android.graphics.text.LineBreaker` and
+ * `android.graphics.text.MeasuredText`) on API 29 and above and a `StaticLayout`-based
+ * fallback on API 24 to 28.
+ *
+ * The measured text always starts at the current paragraph offset: styles must cover the
+ * entire measured text, and the line breaker therefore expects to compute breaks over it.
  */
-private fun MeasuredText.Builder.appendStyleRuns(
+private fun computeMeasuredLines(
     state: TextLayoutState,
-): MeasuredText.Builder {
-    state.currentParagraphStyles().forEach { interval ->
-        if (interval.end > state.paragraphOffset) {
-            val start = max(0, (interval.start - state.paragraphOffset).toInt())
-            val end = (interval.end - state.paragraphOffset).toInt()
-            val style = interval.data!!
-            appendStyleRun(state.paintForStyle(style), end - start, false)
-        }
-    }
+    width: Float,
+    hyphenation: TextFlowHyphenation,
+): MeasuredLines {
+    val styles = state.currentParagraphStyles()
+    val paragraphOffset = state.paragraphOffset
+    val paragraph = state.currentParagraph
 
-    return this
+    return if (Build.VERSION.SDK_INT >= 29) {
+        LineBreakerLines(
+            paragraph.toCharArray(paragraphOffset),
+            styles,
+            paragraphOffset,
+            state::paintForStyle,
+            width,
+            hyphenation,
+        )
+    } else {
+        StaticLayoutLines(
+            paragraph.substring(paragraphOffset),
+            styles,
+            paragraphOffset,
+            state::paintForStyle,
+            width,
+        )
+    }
 }
 
 /**
@@ -398,12 +402,15 @@ private fun justify(
         if (stretchableSpaces != 0) {
             var width = lineWidth
 
-            // When the line is too wide and we don't have a hyphen, LineBreaker was
-            // "desperate" to fit the text, so we can't use its text measurement.
+            // When the line is too wide and we don't have a hyphen, the line breaker
+            // was "desperate" to fit the text, so we can't use its text measurement.
             // Instead we measure the width ourselves so we can shrink the line with
             // negative word spacing
             if (lineTooWide && !hasEndHyphen) {
-                width = state.measuredText.getWidth(paragraphLastLineOffset, endOffset)
+                width = state.lines.width(
+                    paragraphLastLineOffset - state.paragraphOffset,
+                    endOffset - state.paragraphOffset,
+                )
             }
 
             // Compute the amount of spacing to give to each stretchable space
@@ -512,11 +519,10 @@ private class TextLayoutState(
     // Cache of paints used to measurement and drawing
     val paints = mutableMapOf<TextStyle, TextPaint>()
 
-    // Used to measure and break text, initialized here to avoid null checks
-    var measuredText = MeasuredText.Builder(CharArray(1))
-        .appendStyleRun(Paint(), 1, false)
-        .build()
-    var result: LineBreaker.Result? = null
+    // Lines of the remaining text of the current paragraph, measured at the last slot
+    // width we used. Recomputed whenever the layout algorithm consumes text at a
+    // different slot width
+    var lines: MeasuredLines = MeasuredLines.Empty
 
     // For TextFlowLayoutResult
     var textHeight = 0.0f
@@ -645,19 +651,10 @@ private fun countStretchableSpaces(text: String, start: Int, end: Int): Int {
 /**
  * Returns the offset of the last non-whitespace in a given string, starting from [lineEndOffset].
  */
-private fun trimEndSpace(text: String, startOffset: Int, lineEndOffset: Int): Int {
+internal fun trimEndSpace(text: String, startOffset: Int, lineEndOffset: Int): Int {
     var endOffset = lineEndOffset
     while (endOffset > startOffset && isLineEndSpace(text[endOffset - 1])) {
         endOffset--
     }
     return endOffset
-}
-
-private fun MeasuredText.Builder.hyphenation(
-    hyphenation: TextFlowHyphenation,
-): MeasuredText.Builder {
-    if (Build.VERSION.SDK_INT >= 33) {
-        MeasuredTextHelper.hyphenation(this, hyphenation)
-    }
-    return this
 }
